@@ -71,5 +71,6 @@ describe("SaveService", () => {
         const userToUpdate = new UserPOJO('Eliii', '363384101794873354', 10, '2021-01-14T01:11:07.207+01:00');
         saveService.updateUserActivity(userToUpdate);
         expect(saveService.users[0]).to.equal(userToUpdate);
+        
     });
 });
