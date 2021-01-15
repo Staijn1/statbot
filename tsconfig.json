@@ -22,7 +22,8 @@
   "include": [
     "./src/app/**/*.ts",
     "./test/**/*.ts",
-    "./src/assets/**/*.json"],
+    "./src/assets/**/*.json",
+  ],
   "indent": [
     true,
     "spaces",

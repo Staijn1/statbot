@@ -2,6 +2,7 @@ import {UserPOJO} from "../pojo/UserPOJO";
 import * as fs from "fs";
 import * as path from "path";
 import {Presence} from "discord.js";
+import {DateTime} from "luxon";
 
 class SaveService {
     users: UserPOJO[] = [];
@@ -13,10 +14,9 @@ class SaveService {
 
     parseJson(): void {
         if (this.users) this.users = [];
-
         const rawUsers = JSON.parse(this.readActivities());
         for (const raw of rawUsers) {
-            this.users.push(new UserPOJO(raw.username, raw.userid, raw.totalMinutesOnline, raw.onlineSince))
+            this.users.push(new UserPOJO(raw.username, raw.userid, raw.totalMinutesOnline, raw.onlineSince, raw.isOnline, raw.curseCount))
         }
     }
 
@@ -25,7 +25,7 @@ class SaveService {
     }
 
     private saveActivities(): void {
-        fs.writeFileSync(this.FILE_LOCATION, JSON.stringify(this.users), {encoding: "utf-8"});
+        fs.writeFileSync(this.FILE_LOCATION, JSON.stringify(this.users, null, 2), {encoding: "utf-8"});
         this.parseJson();
     }
 
@@ -45,8 +45,31 @@ class SaveService {
         this.saveActivities();
     }
 
+    updateAllUserActivity() {
+        this.saveActivities();
+    }
+
     isOnline(presence: Presence) {
-        return presence.status === 'online' || presence.status === 'dnd';
+        return presence.status === 'online' || presence.status === 'dnd' || presence.status === 'idle';
+    }
+
+    sort(param: (a: UserPOJO, b: UserPOJO) => number) {
+        this.users.sort(param);
+    }
+
+    calculateTimeDifferenceInMinutes(onlineSince: DateTime) {
+        const difference = DateTime.local().diff(onlineSince, 'minutes');
+        return difference.minutes;
+    }
+
+    updateOnlineTime() {
+        for (const user of this.users) {
+            if (user.isOnline) {
+                user.totalMinutesOnline += this.calculateTimeDifferenceInMinutes(user.onlineSince);
+                user.onlineSince = DateTime.local();
+            }
+        }
+        saveService.updateAllUserActivity();
     }
 }
 

@@ -1,6 +1,6 @@
 import {Client, Command, CommandMessage, Description} from "@typeit/discord";
 import {MessageEmbed} from "discord.js";
-import {color} from "../constants";
+import {DEFAULT_COLOR} from "../constants";
 
 export abstract class Help {
     @Command("help")
@@ -10,7 +10,7 @@ export abstract class Help {
             // Set the title of the field
             .setTitle('Help')
             // Set the color of the embed
-            .setColor(color)
+            .setColor(DEFAULT_COLOR)
             // Set the main content of the embed
             .setDescription('heres your help son')
 

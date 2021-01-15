@@ -1,1 +1,16 @@
-[{"username":"Eliii","userid":"363384101794873354","totalMinutesOnline":0,"onlineSince":"2021-01-14T01:01:07.207+01:00"}]
+[
+  {
+    "username": "Eliii",
+    "userid": "363384101794873354",
+    "totalMinutesOnline": 10,
+    "onlineSince": "2021-01-14T01:11:07.207+01:00",
+    "isOnline": true
+  },
+  {
+    "username": "username",
+    "userid": "id",
+    "totalMinutesOnline": 0,
+    "onlineSince": "2021-01-15T15:42:02.813+01:00",
+    "isOnline": true
+  }
+]
