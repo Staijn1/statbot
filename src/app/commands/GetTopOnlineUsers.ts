@@ -1,8 +1,8 @@
 import {Command, CommandMessage, Description} from "@typeit/discord";
 import {MessageEmbed} from "discord.js";
-import {DEFAULT_COLOR, LOGGER} from "../constants";
+import {CREATE_DEFAULT_EMBED, DEFAULT_COLOR} from "../constants";
 import {saveService} from "../services/SaveService";
-import {DateTime, Duration} from "luxon";
+import {Duration} from "luxon";
 import {UserPOJO} from "../pojo/UserPOJO";
 
 export abstract class GetTopOnlineUsers {
@@ -10,11 +10,7 @@ export abstract class GetTopOnlineUsers {
     @Command("topOnline")
     @Description("get the top online users. losers.")
     showTop10OnlineUsers(message: CommandMessage): void {
-        const embed = new MessageEmbed()
-            // Set the title of the field
-            .setTitle('Top 10 Most Online Users')
-            // Set the color of the embed
-            .setColor(DEFAULT_COLOR)
+        const embed = CREATE_DEFAULT_EMBED("Top 10 Online Users", "")
 
         const maxLoopLength = saveService.users.length < 10 ? saveService.users.length : 10;
         saveService.updateOnlineTime();
@@ -29,6 +25,14 @@ export abstract class GetTopOnlineUsers {
             const user = saveService.users[i];
             const formattedTime = Duration.fromObject({minutes: Math.floor(user.totalMinutesOnline)}).toFormat(("y 'years' d 'days' h 'hours' m 'minutes"));
             embed.addField(`${i + 1}. ${user.username}`, formattedTime);
+        }
+
+        const author = saveService.findUserActivity(message.author.id);
+        if (!author) {
+            embed.setFooter("Sorry your curse count could not be loaded.");
+        } else {
+            const formattedTime = Duration.fromObject({minutes: Math.floor(author.totalMinutesOnline)}).toFormat(("y 'years' d 'days' h 'hours' m 'minutes"));
+            embed.setFooter(`You have been online for ${formattedTime}`);
         }
 
         message.channel.send(embed);

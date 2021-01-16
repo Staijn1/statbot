@@ -12,7 +12,7 @@ export abstract class Help {
             // Set the color of the embed
             .setColor(DEFAULT_COLOR)
             // Set the main content of the embed
-            .setDescription('heres your help son')
+            .setDescription('heres your help, son')
 
         for (const command of Client.getCommands()) {
             embed.addField(`${command.prefix}${command.commandName}`, command.description, false)

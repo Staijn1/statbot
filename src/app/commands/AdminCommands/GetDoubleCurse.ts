@@ -2,8 +2,7 @@ import {Command, CommandMessage, Description, Guard} from "@typeit/discord";
 import {NotBotMessage} from "../../guards/NotBot";
 import {IsAdmin} from "../../guards/IsAdmin";
 import {curseService} from "../../services/CurseService";
-import {MessageEmbed} from "discord.js";
-import {DEFAULT_COLOR} from "../../constants";
+import {CREATE_DEFAULT_EMBED} from "../../constants";
 
 type WordCount = {
     word: string,
@@ -16,10 +15,12 @@ export abstract class GetDoubleCurse {
     @Description("Admins only. Get double cursewords")
     @Guard(NotBotMessage, IsAdmin)
     calculateDoubleCurses(message: CommandMessage): void {
-        const response = new MessageEmbed().setTitle("Double words are").setDescription("These words are double or include other words. Remove them for better performance. Fuck is equal to fucker").setColor(DEFAULT_COLOR);
+        const response = CREATE_DEFAULT_EMBED("Double words are: ", "These words are double or include other words. Remove them for better performance. Fuck is equal to fucker")
         curseService.loadWords();
         const doubleWords: WordCount[] = []
 
+        //We need to pick a word to then compare with others. The first loop picks a word, the second one will loop through the others.
+        //Only count occurences if the words are different, and only register it if the occurrences count is > 0
         for (let i = 0; i < curseService.curseWords.length; i++) {
             for (let j = 0; j < curseService.curseWords.length; j++) {
                 const baseWord = curseService.curseWords[i];

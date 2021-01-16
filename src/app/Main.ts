@@ -11,15 +11,18 @@ export class Main {
 
 
     static start(): void {
-        this._client = new Client();
+        this._client = new Client({
+            variablesChar: ':',
+            silent: true,
+            classes: [
+                `${__dirname}/*.ts`,
+                `${__dirname}/*.js`,
+            ]
+        });
 
-        this._client.login(
-            process.env.TOKEN,
-            `${__dirname}/*.ts`,
-            `${__dirname}/*.js`,
-        );
+        this._client.login(process.env.TOKEN,);
     }
 }
 
 
-  Main.start();
+Main.start();

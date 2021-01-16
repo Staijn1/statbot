@@ -1,5 +1,5 @@
 import {GuardFunction} from "@typeit/discord";
-import {GuildMember, MessageEmbed, Permissions} from "discord.js";
+import {MessageEmbed, Permissions} from "discord.js";
 import {ERROR_COLOR} from "../constants";
 
 /**

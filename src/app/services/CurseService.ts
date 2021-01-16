@@ -1,6 +1,5 @@
 import * as path from "path";
 import * as fs from "fs";
-import {saveService} from "./SaveService";
 
 class CurseService {
     FILE_LOCATION = path.join(__dirname, "..", "..", "assets", "data", "curse.json");
@@ -13,16 +12,6 @@ class CurseService {
     loadWords(): void {
         if (this.curseWords) this.curseWords = [];
         this.curseWords = JSON.parse(fs.readFileSync(this.FILE_LOCATION, {encoding: "utf-8"}));
-    }
-
-    checkMessage(content: string, userid: string) {
-        let curseCount = 0;
-        for (const curseWord of this.curseWords) {
-            curseCount += this.occurrences(content.toLowerCase(), curseWord.toLowerCase(), false);
-        }
-        const user = saveService.findUserActivity(userid);
-        user.curseCount += curseCount;
-        saveService.updateUserActivity(user);
     }
 
     /** Function that count occurrences of a substring in a string;

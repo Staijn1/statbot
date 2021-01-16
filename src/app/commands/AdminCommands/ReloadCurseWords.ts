@@ -1,8 +1,7 @@
 import {Command, CommandMessage, Description, Guard} from "@typeit/discord";
 import {NotBotMessage} from "../../guards/NotBot";
 import {IsAdmin} from "../../guards/IsAdmin";
-import {MessageEmbed} from "discord.js";
-import {DEFAULT_COLOR} from "../../constants";
+import {CREATE_DEFAULT_EMBED} from "../../constants";
 import {curseService} from "../../services/CurseService";
 
 export abstract class ReloadCurseWords {
@@ -12,7 +11,7 @@ export abstract class ReloadCurseWords {
     @Guard(NotBotMessage, IsAdmin)
     reloadCurseFile(message: CommandMessage): void {
         curseService.loadWords();
-        const response = new MessageEmbed().setTitle("Succes").setDescription("Succesfully reloaded the curse list!").setColor(DEFAULT_COLOR)
+        const response = CREATE_DEFAULT_EMBED("Success", "Successfully reload the curse list!")
         message.channel.send(response);
     }
 }
