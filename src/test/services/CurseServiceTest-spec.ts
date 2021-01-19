@@ -1,4 +1,5 @@
 import {curseService} from "../../app/services/CurseService";
+import exp = require("constants");
 
 
 test("empty substring", function () {
@@ -41,4 +42,10 @@ test("overlap no occurrences", function () {
     expect(curseService.occurrences("fooofooofooofoo", "foofoo", true)).toEqual(0);
     expect(curseService.occurrences("blafobooblahfoboblah", "foo", true)).toEqual(0);
     expect(curseService.occurrences("fofofofaooooofo", "foo", true)).toEqual(0);
+});
+
+test("load words does not leave curseWords empty", function () {
+    curseService.loadWords();
+    expect(curseService.curseWords).toBeTruthy();
+    expect(curseService.curseWords.length).not.toEqual(0);
 });

@@ -16,7 +16,7 @@ export abstract class EPresence {
         const changedUser = saveService.findUserActivity(newPresence.user.id);
         // If this user does not exist yet and went online, add him
         if (!changedUser && saveService.isOnline(newPresence)){
-            saveService.addUserActivities(new UserPOJO(newPresence.user.username, newPresence.user.id, 0, DateTime.local().toISO(), true, 0));
+            saveService.addUserActivities(new UserPOJO(newPresence.user.username, newPresence.user.id, 0, DateTime.local().toISO(), true, 0, 0,0));
             return;
         }
 

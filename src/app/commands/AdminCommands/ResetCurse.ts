@@ -14,9 +14,9 @@ export abstract class ResetCurse {
      Formats:\n
      ${PREFIX}resetCurse | Resets all users curse stats\n
      ${PREFIX}resetCurse @User | Resets the user curse count to 0\n
-     ${PREFIX}resetCurse @User +100 | Adds 100 counter to User`)
+     ${PREFIX}resetCurse @User 100 | Sets user to 100`)
     @Guard(NotBotMessage, IsAdmin)
-    resetCurse(message: CommandMessage): void {
+    async resetCurse(message: CommandMessage): Promise<void> {
         this.responseEmbed = CREATE_DEFAULT_EMBED("Success", "Altered curse count succesfully!");
         if (message.args.length > 2) {
             this.responseEmbed = CREATE_ERROR_EMBED('Error!', `Invalid amount or order of parameters! Use ${PREFIX}help for help`)
@@ -34,8 +34,11 @@ export abstract class ResetCurse {
             this.responseEmbed = CREATE_ERROR_EMBED('Error!', `Invalid amount or order of parameters! Use ${PREFIX}help for help`);
         }
 
-        message.channel.send(this.responseEmbed)
-
+        const sentMessage = await message.channel.send(this.responseEmbed)
+        setTimeout(async () => {
+            await message.delete();
+            await sentMessage.delete();
+        }, 1000);
     }
 
     private updateUser(message: CommandMessage, amount: number): void {
@@ -44,8 +47,7 @@ export abstract class ResetCurse {
         if (!foundUser) {
             this.responseEmbed = CREATE_ERROR_EMBED("Error!", "User not found!")
         } else {
-            if (amount == 0) foundUser.curseCount = 0;
-            else foundUser.curseCount += amount;
+            foundUser.curseCount = amount;
             saveService.updateUserActivity(foundUser);
         }
     }

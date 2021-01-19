@@ -16,7 +16,9 @@ class SaveService {
         if (this.users) this.users = [];
         const rawUsers = JSON.parse(this.readActivities());
         for (const raw of rawUsers) {
-            this.users.push(new UserPOJO(raw.username, raw.userid, raw.totalMinutesOnline, raw.onlineSince, raw.isOnline, raw.curseCount))
+            const messagesSent = raw.messagesSent ? raw.messagesSent : 0;
+            const inactivityWarning = raw.inactiveWarnings ? raw.inactiveWarnings : 0;
+            this.users.push(new UserPOJO(raw.username, raw.userid, raw.totalMinutesOnline, raw.onlineSince, raw.isOnline, raw.curseCount, messagesSent, inactivityWarning))
         }
     }
 

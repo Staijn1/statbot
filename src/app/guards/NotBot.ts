@@ -15,7 +15,6 @@ export const NotBotPresence: GuardFunction<"presenceUpdate"> = async (
     client,
     next
 ) => {
-    const guild = await client.guilds.fetch(process.env.GUILD_TOKEN)
-    const member = await guild.members.fetch(newPresence.userID);
+    const member = await newPresence.guild.members.cache.get(newPresence.userID)
     if (!member.user.bot) await next();
 }

@@ -5,19 +5,22 @@ import {saveService} from "../services/SaveService";
 
 
 export abstract class EMessage {
+    // The emoji number will correspond with the index its in. index 0 is emoji 0
     @On("message")
     @Guard(NotBotMessage)
-    message([message]: ArgsOf<"message">): void {
+    async message([message]: ArgsOf<"message">): Promise<void> {
         let curseCount = 0;
         for (const curseWord of curseService.curseWords) {
             curseCount += curseService.occurrences(message.content.toLowerCase(), curseWord.toLowerCase(), false);
         }
+
         const user = saveService.findUserActivity(message.author.id);
         user.curseCount += curseCount;
+        user.messagesSent++;
         saveService.updateUserActivity(user);
 
         if (curseCount > 5) {
-            message.reply("are you okay?")
+            await message.reply("are you okay?")
         }
     }
 }

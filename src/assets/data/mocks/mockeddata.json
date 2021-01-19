@@ -2,15 +2,21 @@
   {
     "username": "Eliii",
     "userid": "363384101794873354",
-    "totalMinutesOnline": 10,
-    "onlineSince": "2021-01-14T01:11:07.207+01:00",
-    "isOnline": true
+    "totalMinutesOnline": 7850.651733333333,
+    "onlineSince": "2021-01-19T11:51:46.314+01:00",
+    "isOnline": true,
+    "curseCount": 0,
+    "messagesSent": 0,
+    "inactiveWarnings": 0
   },
   {
     "username": "username",
     "userid": "id",
-    "totalMinutesOnline": 0,
-    "onlineSince": "2021-01-15T15:42:02.813+01:00",
-    "isOnline": true
+    "totalMinutesOnline": 0.00055,
+    "onlineSince": "2021-01-19T11:51:46.314+01:00",
+    "isOnline": true,
+    "curseCount": 0,
+    "messagesSent": 0,
+    "inactiveWarnings": 0
   }
 ]

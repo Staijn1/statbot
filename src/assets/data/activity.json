@@ -29,7 +29,9 @@
     "totalMinutesOnline": 719.2756833333333,
     "onlineSince": "2021-01-16T21:25:52.738+00:00",
     "isOnline": true,
-    "curseCount": 19
+    "curseCount": 19,
+    "messagesSent": 100,
+    "inactiveWarnings": 0
   },
   {
     "username": "SiMO",
@@ -77,7 +79,7 @@
     "totalMinutesOnline": 331.43971666666664,
     "onlineSince": "2021-01-16T17:34:51.360+00:00",
     "isOnline": false,
-    "curseCount": -27711
+    "curseCount": 0
   },
   {
     "username": "mybuiscuitzrmine",
@@ -93,7 +95,7 @@
     "totalMinutesOnline": 968.82845,
     "onlineSince": "2021-01-16T21:25:52.738+00:00",
     "isOnline": true,
-    "curseCount": -27327
+    "curseCount": 0
   },
   {
     "username": "luckymeiseeghosts",

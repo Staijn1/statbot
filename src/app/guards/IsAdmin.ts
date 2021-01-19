@@ -1,6 +1,7 @@
 import {GuardFunction} from "@typeit/discord";
 import {MessageEmbed, Permissions} from "discord.js";
 import {ERROR_COLOR} from "../constants";
+import {DateTime} from "luxon";
 
 /**
  * Checks if the user that sent the message is an admin. This is done by fetching the guild with ID, and then fetching the user in the guild using his user id
@@ -16,8 +17,8 @@ export const IsAdmin: GuardFunction<"message"> = async (
     client,
     next
 ) => {
-    const guild = await client.guilds.fetch(process.env.GUILD_TOKEN)
-    const guildMember = await guild.members.fetch({user: message.author.id});
+    const guild = client.guilds.cache.get(message.guild.id);
+    const guildMember = guild.members.cache.get(message.author.id);
     const permissions = guildMember.permissions.bitfield;
     const permissionToCheck = Permissions.FLAGS.BAN_MEMBERS;
 

@@ -10,7 +10,7 @@ jest.disableAutomock();
 beforeAll(() => {
     saveService.users = [];
     const testUser = JSON.parse("{\"username\":\"Eliii\",\"userid\":\"363384101794873354\",\"totalMinutesOnline\":0,\"onlineSince\":\"2021-01-14T01:01:07.207+01:00\"}");
-    saveService.addUserActivities(new UserPOJO(testUser.username, testUser.userid, testUser.totalMinutesOnline, testUser.onlineSince, true))
+    saveService.addUserActivities(new UserPOJO(testUser.username, testUser.userid, testUser.totalMinutesOnline, testUser.onlineSince, true, 0, 0, 0))
     saveService.parseJson();
 })
 
@@ -38,7 +38,7 @@ test('should call parseJSON when finding user', () => {
 });
 
 test('should add user to array', () => {
-    const userToAdd = new UserPOJO('username', 'id', 0, DateTime.local().toISO(), true);
+    const userToAdd = new UserPOJO('username', 'id', 0, DateTime.local().toISO(), true, 0, 0, 0);
     const currentArrayLength = saveService.users.length;
     saveService.addUserActivities(userToAdd);
     expect(saveService.users.length).toBe(currentArrayLength + 1);
@@ -59,7 +59,7 @@ test('should return false because user is not online', () => {
 });
 
 test('should update existing user in user array AND in file', () => {
-    const userToUpdate = new UserPOJO('Eliii', '363384101794873354', 10, '2021-01-14T01:11:07.207+01:00', true);
+    const userToUpdate = new UserPOJO('Eliii', '363384101794873354', 10, '2021-01-14T01:11:07.207+01:00', true, 0, 0, 0);
     saveService.updateUserActivity(userToUpdate);
     expect(JSON.stringify(saveService.users[0])).toBe(JSON.stringify(userToUpdate));
 
@@ -69,7 +69,7 @@ test('should update existing user in user array AND in file', () => {
 });
 
 test('should do nothing when updating non existing user', () => {
-    const userToUpdate = new UserPOJO('Eliii', 'sdf', 10, '2021-01-14T01:11:07.207+01:00', true);
+    const userToUpdate = new UserPOJO('Eliii', 'sdf', 10, '2021-01-14T01:11:07.207+01:00', true, 0, 0, 0);
     const currentUsers = saveService.users;
     saveService.updateUserActivity(userToUpdate);
 
@@ -78,4 +78,11 @@ test('should do nothing when updating non existing user', () => {
     saveService.parseJson();
     expect(JSON.stringify(saveService.users)).toBe(JSON.stringify(currentUsers));
 });
+
+test('updateOnlineTime should not update time if users are online', () => {
+    saveService.updateOnlineTime()
+    const calculateTimeSpy = spyOn(saveService, "calculateTimeDifferenceInMinutes");
+    expect(calculateTimeSpy).not.toHaveBeenCalled();
+});
+
 
