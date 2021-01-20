@@ -1,17 +1,22 @@
 import * as path from "path";
 import * as fs from "fs";
+import {DatabaseService} from "./DatabaseService";
+import {CursePOJO} from "../pojo/CursePOJO";
+import {DESC} from "../constants";
 
-class CurseService {
-    FILE_LOCATION = path.join(__dirname, "..", "..", "assets", "data", "curse.json");
+class CurseService extends DatabaseService {
+    CURE_WORD_LIST_LOCATION = path.join(__dirname, "..", "..", "assets", "data", "curse.json");
     curseWords: string[] = [];
 
     constructor() {
+        super('curseData.nedb')
         this.loadWords();
     }
 
+
     loadWords(): void {
         if (this.curseWords) this.curseWords = [];
-        this.curseWords = JSON.parse(fs.readFileSync(this.FILE_LOCATION, {encoding: "utf-8"}));
+        this.curseWords = JSON.parse(fs.readFileSync(this.CURE_WORD_LIST_LOCATION, {encoding: "utf-8"}));
     }
 
     /** Function that count occurrences of a substring in a string;
@@ -40,6 +45,39 @@ class CurseService {
             } else break;
         }
         return n;
+    }
+
+    async find(sort = undefined): Promise<CursePOJO[]> {
+        const resultDatabase = await this.conn.find({}).sort(sort);
+        const curses = [];
+        resultDatabase.forEach(row => {
+            curses.push(new CursePOJO(row.username, row.userid, row.curseCount));
+        });
+
+        return curses;
+    }
+
+    async findOne(options: unknown): Promise<CursePOJO> {
+        const result = await this.conn.findOne(options);
+        if (result) return new CursePOJO(result.username, result.userid, result.curseCount);
+        else return undefined
+    }
+
+    getCurseCount(content: string): number {
+        let curseCount = 0;
+        for (const curseWord of curseService.curseWords) {
+            curseCount += curseService.occurrences(content.toLowerCase(), curseWord.toLowerCase(), false);
+        }
+        return curseCount;
+    }
+
+    async getTopCursers(): Promise<CursePOJO[]> {
+        const topCursers: CursePOJO[] = [];
+        const items = await this.conn.find({}).sort({curseCount: DESC}).exec();
+        items.forEach(doc => {
+            topCursers.push(new CursePOJO(doc.username, doc.userid, doc.curseCount));
+        })
+        return topCursers;
     }
 }
 

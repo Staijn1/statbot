@@ -12,9 +12,15 @@ export abstract class Help {
             // Set the color of the embed
             .setColor(DEFAULT_COLOR)
             // Set the main content of the embed
-            .setDescription('heres your help, son')
+            .setDescription('Here is your help, son')
 
-        for (const command of Client.getCommands()) {
+        const commands = Client.getCommands();
+        commands.sort(((a, b) => {
+            const textA = (a.commandName as string).toUpperCase();
+            const textB =  (b.commandName as string).toUpperCase();
+            return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+        }))
+        for (const command of commands) {
             embed.addField(`${command.prefix}${command.commandName}`, command.description, false)
         }
         message.channel.send(embed);

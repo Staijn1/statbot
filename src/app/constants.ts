@@ -25,6 +25,9 @@ export const CREATE_DEFAULT_EMBED = (title, message) => {
     return new MessageEmbed().setTitle(title).setDescription(message).setColor(DEFAULT_COLOR)
 }
 export const ACTIVE_USER = 100;
+export const DESC = -1;
+export const ASC = 1;
+export const TIMEOUT = 3000;
 export const constrain = (num: number, min: number, max: number): number => {
     const MIN = min || 1;
     const MAX = max || 20;

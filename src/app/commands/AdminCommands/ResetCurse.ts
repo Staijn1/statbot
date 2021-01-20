@@ -1,9 +1,9 @@
 import {Command, CommandMessage, Description, Guard} from "@typeit/discord";
 import {NotBotMessage} from "../../guards/NotBot";
 import {IsAdmin} from "../../guards/IsAdmin";
-import {CREATE_DEFAULT_EMBED, CREATE_ERROR_EMBED, LOGGER, PREFIX} from "../../constants";
-import {saveService} from "../../services/SaveService";
+import {CREATE_DEFAULT_EMBED, CREATE_ERROR_EMBED, LOGGER, PREFIX, TIMEOUT} from "../../constants";
 import {MessageEmbed} from "discord.js";
+import {curseService} from "../../services/CurseService";
 
 export abstract class ResetCurse {
 
@@ -24,31 +24,33 @@ export abstract class ResetCurse {
 
         // No parameter is supplied if this is true. Reset all cursecounts.
         if (!message.args.username && !message.args.amount) {
-            saveService.users.forEach(user => user.curseCount = 0);
-            saveService.updateAllUserActivity();
+
+            const users = await curseService.find();
+            users.forEach(user => {
+                user.curseCount = 0;
+                curseService.update({userid: user.userid}, user);
+            });
+
         } else if (message.args.username && !message.args.amount && typeof message.args.username === "string") {
-            this.updateUser(message, 0);
+            await this.updateUser(message, 0);
         } else if (message.args.username && message.args.amount && typeof message.args.username === "string" && typeof message.args.amount === 'number') {
-            this.updateUser(message, message.args.amount);
+            await this.updateUser(message, message.args.amount);
         } else {
             this.responseEmbed = CREATE_ERROR_EMBED('Error!', `Invalid amount or order of parameters! Use ${PREFIX}help for help`);
         }
 
         const sentMessage = await message.channel.send(this.responseEmbed)
-        setTimeout(async () => {
-            await message.delete();
-            await sentMessage.delete();
-        }, 1000);
+        await message.delete({timeout: TIMEOUT});
+        await sentMessage.delete({timeout: TIMEOUT});
     }
 
-    private updateUser(message: CommandMessage, amount: number): void {
-        const foundUser = saveService.findUserActivity(this.getUserId(message.args.username));
-        // If the user is not found, send error
-        if (!foundUser) {
-            this.responseEmbed = CREATE_ERROR_EMBED("Error!", "User not found!")
+    private async updateUser(message: CommandMessage, amount: number): Promise<void> {
+        const user = await curseService.findOne({userid: this.getUserId(message.args.username)});
+        if (user) {
+            user.curseCount = amount;
+            curseService.update({userid: user.userid}, user);
         } else {
-            foundUser.curseCount = amount;
-            saveService.updateUserActivity(foundUser);
+            this.responseEmbed = CREATE_ERROR_EMBED("Error!", "User not found!")
         }
     }
 
@@ -56,7 +58,7 @@ export abstract class ResetCurse {
      * Filter out the <@! and > in the strings, leaving only numbers (userid). Join them from one array into a string
      * @param garbledUserId - The garbled userid to format
      */
-    getUserId(garbledUserId: string) {
+    getUserId(garbledUserId: string): string {
         try {
             return garbledUserId.match(/\d/g).join("");
         } catch (e) {
