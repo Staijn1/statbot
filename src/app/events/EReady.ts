@@ -1,17 +1,18 @@
 import {On} from "@typeit/discord";
-import {ACTIVE_USER, constrain, CREATE_DEFAULT_EMBED, LOGGER} from "../constants";
+import {ACTIVE_USER, constrain, CREATE_DEFAULT_EMBED, DATE_FORMAT, LOGGER} from "../utils/constants";
 import {Main} from "../Main";
 import {onlineTimeService} from "../services/OnlineTimeService";
 import {UserPOJO} from "../pojo/UserPOJO";
 import {DateTime} from "luxon";
+import {curseService} from "../services/CurseService";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const schedule = require("node-schedule")
 
 export abstract class EReady {
     @On("ready")
-    async initialize(): Promise<void> {
-        const guildMembers = await Main.Client.guilds.cache.get(process.env.GUILD_TOKEN).members.cache;
+    initialize(): void {
+        const guildMembers = Main.Client.guilds.cache.get(process.env.GUILD_TOKEN).members.cache;
         guildMembers.forEach((guildMember) => {
             onlineTimeService.findOne({userid: guildMember.user.id}).then(user => {
                 const isOnline = onlineTimeService.isOnline(guildMember.user.presence);
@@ -19,13 +20,19 @@ export abstract class EReady {
                 if (isOnline && !guildMember.user.bot && !user) {
                     onlineTimeService.addUserActivities(new UserPOJO(guildMember.user.username, guildMember.user.id, 0, DateTime.local().toISO(), true, 0, 0))
                 }
-                // If the user exists, put his online status to his current online status, so it matches. Because we can't guarantee he was online all the time since onlineSince, we don't calculate minutes online.
-                // Minutes are lost
+                // If the user exists, put his online status to his current online status, so it matches. Because we can't guarantee he was online all the time since onlineSince, we don't calculate minutes online.// Minutes are lost
                 else if (user) {
                     user.isOnline = isOnline;
                     onlineTimeService.update({userid: user.userid}, user);
                 }
             });
+
+            curseService.findOne({userid: guildMember.user.id}).then(curseUser => {
+                if (curseUser && !curseUser.cursePerDay){
+                    curseUser.cursePerDay = [{date: DateTime.local().toFormat(DATE_FORMAT), count: curseUser.curseCount}];
+                    curseService.update({userid: curseUser.userid}, curseUser);
+                }
+            })
         });
 
         // 0 0 1 * *
@@ -33,6 +40,7 @@ export abstract class EReady {
         // This function will fire at that time
         schedule.scheduleJob('0 0 1 * *', async () => {
             LOGGER.info("Resetting message count and updating inactive count. It's the first of the month!")
+            //todo reset cursesADay aswell
             const users = await onlineTimeService.find({});
             users.forEach(user => {
                 if (user.messagesSent < ACTIVE_USER) {

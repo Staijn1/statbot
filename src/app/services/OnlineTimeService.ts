@@ -3,7 +3,7 @@ import {DatabaseService} from "./DatabaseService";
 import {Presence} from "discord.js";
 import {UserPOJO} from "../pojo/UserPOJO";
 import {DateTime} from "luxon";
-import {DESC} from "../constants";
+import {DESC} from "../utils/constants";
 
 class OnlineTimeService extends DatabaseService {
     FILE_LOCATION = path.join(__dirname, "..", "..", "assets", "data", "activity.json");
@@ -12,8 +12,8 @@ class OnlineTimeService extends DatabaseService {
         super('activity.nedb')
     }
 
-    async find(sort = undefined): Promise<UserPOJO[]> {
-        const resultDatabase = await this.conn.find({}).sort(sort);
+    async find(sort = undefined, limit = undefined): Promise<UserPOJO[]> {
+        const resultDatabase = await this.conn.find({}).sort(sort).limit(limit);
         const users = [];
         resultDatabase.forEach(row => {
             users.push(new UserPOJO(row.username, row.userid, row.totalMinutesOnline, row.onlineSince, row.isOnline, row.messagesSent, row.inactiveWarnings))
@@ -42,7 +42,7 @@ class OnlineTimeService extends DatabaseService {
     }
 
     async getTopOnline(): Promise<UserPOJO[]> {
-        return this.find({totalMinutesOnline: DESC});
+        return this.find({totalMinutesOnline: DESC}, 10);
     }
 
     updateOnlineTimeOnlineUser(changedUser: UserPOJO) {
@@ -54,7 +54,7 @@ class OnlineTimeService extends DatabaseService {
     }
 
     async findMostActiveUsers(): Promise<UserPOJO[]> {
-        return this.find({messagesSent: DESC});
+        return this.find({messagesSent: DESC}, 10);
     }
 
     async getTopInactiveMembers() {

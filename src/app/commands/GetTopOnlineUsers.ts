@@ -1,5 +1,5 @@
 import {Command, CommandMessage, Description} from "@typeit/discord";
-import {CREATE_DEFAULT_EMBED} from "../constants";
+import {CREATE_DEFAULT_EMBED, LOGGER} from "../utils/constants";
 import {onlineTimeService} from "../services/OnlineTimeService";
 import {Duration} from "luxon";
 
@@ -9,18 +9,22 @@ export abstract class GetTopOnlineUsers {
     @Description("get the top online users. losers.")
     async showTop10OnlineUsers(message: CommandMessage): Promise<void> {
         const embed = CREATE_DEFAULT_EMBED("Top 10 Online Users", "Times are sum of all online time");
-        await onlineTimeService.find().then(users => {
-            users.forEach(user => {
-                onlineTimeService.updateOnlineTimeOnlineUser(user);
-            });
-        })
+        const users = await onlineTimeService.find();
+        users.forEach(user => {
+            onlineTimeService.updateOnlineTimeOnlineUser(user);
+        });
         const sortedUsers = await onlineTimeService.getTopOnline();
-        const maxLoopLength = sortedUsers.length < 10 ? sortedUsers.length : 10;
 
-        const user = await message.guild.members.cache.get(sortedUsers[0].userid)
-        embed.setThumbnail(user.user.displayAvatarURL())
+        if (sortedUsers.length > 0) {
+            try {
+                const member = await message.guild.members.cache.get(sortedUsers[0].userid);
+                embed.setThumbnail(member.user.displayAvatarURL());
+            } catch (e) {
+                LOGGER.error(`${e.message} || ${e.stack}`)
+            }
+        }
 
-        for (let i = 0; i < maxLoopLength; i++) {
+        for (let i = 0; i < sortedUsers.length; i++) {
             const user = sortedUsers[i];
             const formattedTime = Duration.fromObject({minutes: Math.floor(user.totalMinutesOnline)}).toFormat(("y 'years' d 'days' h 'hours' m 'minutes"));
             embed.addField(`${i + 1}. ${user.username}`, formattedTime);

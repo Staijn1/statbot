@@ -6,6 +6,7 @@ import {Message} from "discord.js";
 import {onlineTimeService} from "../services/OnlineTimeService";
 import {UserPOJO} from "../pojo/UserPOJO";
 import {DateTime} from "luxon";
+import {DATE_FORMAT} from "../utils/constants";
 
 
 export abstract class EMessage {
@@ -18,17 +19,29 @@ export abstract class EMessage {
 
     private async handleCursing(message: Message): Promise<void> {
         const curseCount = curseService.getCurseCount(message.content);
-        const user = await curseService.findOne({userid: message.author.id});
+        const user = await curseService.findOne({userid: message.author.id,});
 
         if (user) {
             user.curseCount += curseCount;
+            // For backwards compatibleness
+            if (!user.cursePerDay) user.cursePerDay = []
+            const today = user.cursePerDay.find(day => day.date === DateTime.local().toFormat(DATE_FORMAT));
+
+            if (!today) user.cursePerDay.push({date: DateTime.local().toFormat(DATE_FORMAT), count: curseCount});
+            else today.count += curseCount;
+
             curseService.update({userid: message.author.id}, user);
         } else {
-            curseService.insert(new CursePOJO(message.author.username, message.author.id, curseCount));
+            curseService.insert(new CursePOJO(message.author.username, message.author.id, curseCount, [
+                {
+                    date: DateTime.local().toFormat(DATE_FORMAT),
+                    count: curseCount
+                }]
+            ));
         }
 
         if (curseCount > 5) {
-            await message.reply("are you okay? Been swearing a lot lol.")
+            await message.reply("are you okay? Been swearing a lot :)")
         }
     }
 

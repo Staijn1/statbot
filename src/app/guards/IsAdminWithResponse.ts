@@ -1,6 +1,6 @@
 import {GuardFunction} from "@typeit/discord";
 import {MessageEmbed, Permissions} from "discord.js";
-import {ERROR_COLOR} from "../constants";
+import {ERROR_COLOR} from "../utils/constants";
 import {DateTime} from "luxon";
 
 /**
@@ -12,7 +12,7 @@ import {DateTime} from "luxon";
  * @param next
  * @constructor
  */
-export const IsAdmin: GuardFunction<"message"> = async (
+export const IsAdminWithResponse: GuardFunction<"message"> = async (
     [message],
     client,
     next

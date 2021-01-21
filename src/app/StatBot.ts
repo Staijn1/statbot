@@ -1,6 +1,6 @@
 import {CommandMessage, CommandNotFound, Discord,} from "@typeit/discord";
 import * as Path from "path";
-import {PREFIX} from "./constants";
+import {PREFIX} from "./utils/constants";
 
 @Discord(PREFIX, {
     import: [

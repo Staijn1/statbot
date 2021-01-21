@@ -1,7 +1,6 @@
 import {Command, CommandMessage, Description} from "@typeit/discord";
-import {CREATE_DEFAULT_EMBED, LOGGER} from "../constants";
+import {CREATE_DEFAULT_EMBED, LOGGER} from "../utils/constants";
 import {onlineTimeService} from "../services/OnlineTimeService";
-import {UserPOJO} from "../pojo/UserPOJO";
 
 export abstract class GetTopActiveUsers {
 
@@ -10,16 +9,15 @@ export abstract class GetTopActiveUsers {
     async showTopActiveUsers(message: CommandMessage): Promise<void> {
         const embed = CREATE_DEFAULT_EMBED("Top 10 Active Users", "The count of messages in this month.")
         const users = await onlineTimeService.findMostActiveUsers();
-        const maxLoopLength = users.length < 10 ? users.length : 10;
 
         const user = await message.guild.members.cache.get(users[0].userid);
         try {
-            embed.setThumbnail(user.user.displayAvatarURL())
+            embed.setThumbnail(user.user.displayAvatarURL());
         } catch (e) {
-            LOGGER.error(e.message + e.stack)
+            LOGGER.error(`${e.message} || ${e.stack}`)
         }
 
-        for (let i = 0; i < maxLoopLength; i++) {
+        for (let i = 0; i < users.length; i++) {
             const user = users[i];
             embed.addField(`${i + 1}. ${user.username}`, `${user.messagesSent} messages sent`);
         }

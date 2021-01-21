@@ -1,8 +1,9 @@
 import Datastore = require("nedb-promises");
+import path from "path";
 
 export abstract class DatabaseService {
     protected conn;
-    private readonly baseUrl = './build/assets/data/'
+    private readonly baseUrl = path.join(__dirname,'..', '..','/assets/data/')
 
     protected constructor(fileUrl: string) {
         this.conn = Datastore.create({

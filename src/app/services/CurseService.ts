@@ -2,7 +2,7 @@ import * as path from "path";
 import * as fs from "fs";
 import {DatabaseService} from "./DatabaseService";
 import {CursePOJO} from "../pojo/CursePOJO";
-import {DESC} from "../constants";
+import {DESC} from "../utils/constants";
 
 class CurseService extends DatabaseService {
     CURE_WORD_LIST_LOCATION = path.join(__dirname, "..", "..", "assets", "data", "curse.json");
@@ -51,7 +51,7 @@ class CurseService extends DatabaseService {
         const resultDatabase = await this.conn.find({}).sort(sort);
         const curses = [];
         resultDatabase.forEach(row => {
-            curses.push(new CursePOJO(row.username, row.userid, row.curseCount));
+            curses.push(new CursePOJO(row.username, row.userid, row.curseCount, row.cursePerDay));
         });
 
         return curses;
@@ -59,7 +59,7 @@ class CurseService extends DatabaseService {
 
     async findOne(options: unknown): Promise<CursePOJO> {
         const result = await this.conn.findOne(options);
-        if (result) return new CursePOJO(result.username, result.userid, result.curseCount);
+        if (result) return new CursePOJO(result.username, result.userid, result.curseCount, result.cursePerDay);
         else return undefined
     }
 
@@ -73,9 +73,9 @@ class CurseService extends DatabaseService {
 
     async getTopCursers(): Promise<CursePOJO[]> {
         const topCursers: CursePOJO[] = [];
-        const items = await this.conn.find({}).sort({curseCount: DESC}).exec();
+        const items = await this.conn.find({}).sort({curseCount: DESC}).limit(10).exec();
         items.forEach(doc => {
-            topCursers.push(new CursePOJO(doc.username, doc.userid, doc.curseCount));
+            topCursers.push(new CursePOJO(doc.username, doc.userid, doc.curseCount, doc.cursePerDay));
         })
         return topCursers;
     }

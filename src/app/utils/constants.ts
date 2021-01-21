@@ -2,7 +2,10 @@ import * as winston from "winston";
 import {format, transports} from "winston";
 import {MessageEmbed} from "discord.js";
 
+//These two are the same color!
 export const DEFAULT_COLOR = 0xdb682e;
+export const DEFAULT_COLOR_RGB = 'rgb(219,104,46)';
+
 export const ERROR_COLOR = 0xff0000;
 export const PREFIX = "&";
 export const LOGGER = winston.createLogger({
@@ -33,3 +36,4 @@ export const constrain = (num: number, min: number, max: number): number => {
     const MAX = max || 20;
     return Math.min(Math.max(num, MIN), MAX)
 }
+export const DATE_FORMAT = 'dd-MM-yyyy';

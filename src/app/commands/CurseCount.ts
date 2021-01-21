@@ -1,5 +1,5 @@
 import {Command, CommandMessage, Description} from "@typeit/discord";
-import {CREATE_DEFAULT_EMBED} from "../constants";
+import {CREATE_DEFAULT_EMBED, LOGGER} from "../utils/constants";
 import {curseService} from "../services/CurseService";
 import {CursePOJO} from "../pojo/CursePOJO";
 
@@ -10,14 +10,17 @@ export abstract class CurseCount {
         const response = CREATE_DEFAULT_EMBED("Top 10 Profane Users", "");
 
         const topCursers: CursePOJO[] = await curseService.getTopCursers();
-        const maxLoopLength = topCursers.length < 10 ? topCursers.length : 10;
 
-        if (maxLoopLength > 0) {
-            const member = await message.guild.members.cache.get(topCursers[0].userid);
-            response.setThumbnail(member.user.displayAvatarURL());
+        if (topCursers.length > 0) {
+            try {
+                const member = await message.guild.members.cache.get(topCursers[0].userid);
+                response.setThumbnail(member.user.displayAvatarURL());
+            } catch (e) {
+                LOGGER.error(`${e.message} || ${e.stack}`)
+            }
         }
 
-        for (let i = 0; i < maxLoopLength; i++) {
+        for (let i = 0; i < topCursers.length; i++) {
             const user = topCursers[i];
             response.addField(`${i + 1}. ${user.username}`, `Cursed: ${user.curseCount} times.`);
         }

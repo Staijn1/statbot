@@ -1,8 +1,8 @@
-import {Command, CommandMessage, Description, Guard} from "@typeit/discord";
+import {Command, CommandMessage, Description, Guard, Infos} from "@typeit/discord";
 import {NotBotMessage} from "../../guards/NotBot";
-import {IsAdmin} from "../../guards/IsAdmin";
+import {IsAdminWithResponse} from "../../guards/IsAdminWithResponse";
 import {curseService} from "../../services/CurseService";
-import {CREATE_DEFAULT_EMBED, TIMEOUT} from "../../constants";
+import {CREATE_DEFAULT_EMBED} from "../../utils/constants";
 
 type WordCount = {
     word: string,
@@ -12,8 +12,8 @@ type WordCount = {
 export abstract class GetDoubleCurse {
 
     @Command("doubleCurse")
-    @Description("Admins only. Get double cursewords")
-    @Guard(NotBotMessage, IsAdmin)
+    @Infos({forAdmins: true, description: "Get double curse words in the curse list"})
+    @Guard(NotBotMessage, IsAdminWithResponse)
     async calculateDoubleCurses(message: CommandMessage): Promise<void> {
         const response = CREATE_DEFAULT_EMBED("Double words are: ", "These words are double or include other words. Remove them for better performance. Fuck is equal to fucker")
         curseService.loadWords();
