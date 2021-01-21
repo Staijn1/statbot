@@ -1,5 +1,4 @@
 import {curseService} from "../../app/services/CurseService";
-import exp = require("constants");
 
 
 test("empty substring", function () {

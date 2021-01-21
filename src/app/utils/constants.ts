@@ -1,6 +1,5 @@
 import * as winston from "winston";
 import {format, transports} from "winston";
-import {MessageEmbed} from "discord.js";
 
 //These two are the same color!
 export const DEFAULT_COLOR = 0xdb682e;
@@ -21,19 +20,24 @@ export const LOGGER = winston.createLogger({
         // new winston.transports.File({filename: 'logs/combined.log'}),
     ],
 });
-export const CREATE_ERROR_EMBED = (title, message) => {
-    return new MessageEmbed().setTitle(title).setDescription(message).setColor(ERROR_COLOR)
-}
-export const CREATE_DEFAULT_EMBED = (title, message) => {
-    return new MessageEmbed().setTitle(title).setDescription(message).setColor(DEFAULT_COLOR)
-}
 export const ACTIVE_USER = 100;
 export const DESC = -1;
 export const ASC = 1;
 export const TIMEOUT = 3000;
-export const constrain = (num: number, min: number, max: number): number => {
-    const MIN = min || 1;
-    const MAX = max || 20;
-    return Math.min(Math.max(num, MIN), MAX)
-}
 export const DATE_FORMAT = 'dd-MM-yyyy';
+// 0 0 1 * *
+// at 00:00 first day of the month
+export const CRON_SCHEDULE = '0 0 1 * *';
+
+export const possibleChartColors = [
+    '#FAD141',
+    '#D94B21',
+    '#C330F0',
+    '#216FD9',
+    '#26FC75',
+    '#c6f839',
+    '#D975D5',
+    '#88C6FC',
+    '#EAF59A',
+    '#C73C6C'
+];

@@ -1,8 +1,8 @@
-import {Command, CommandMessage, Description, Guard, Infos} from "@typeit/discord";
+import {Command, CommandMessage, Guard, Infos} from "@typeit/discord";
 import {NotBotMessage} from "../../guards/NotBot";
 import {IsAdminWithResponse} from "../../guards/IsAdminWithResponse";
-import {CREATE_DEFAULT_EMBED} from "../../utils/constants";
 import {onlineTimeService} from "../../services/OnlineTimeService";
+import {CREATE_DEFAULT_EMBED} from "../../utils/Functions";
 
 export abstract class GetInactiveUsers {
 

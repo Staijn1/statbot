@@ -1,6 +1,7 @@
 import {Command, CommandMessage, Description} from "@typeit/discord";
-import {CREATE_DEFAULT_EMBED, LOGGER} from "../utils/constants";
+import {LOGGER} from "../utils/constants";
 import {onlineTimeService} from "../services/OnlineTimeService";
+import {CREATE_DEFAULT_EMBED} from "../utils/Functions";
 
 export abstract class GetTopActiveUsers {
 

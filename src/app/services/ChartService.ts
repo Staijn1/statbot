@@ -30,8 +30,15 @@ export class ChartService {
                     },
                     ticks: {
                         beginAtZero: true,
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        //@ts-ignore
+                        userCallback: function(label, index, labels) {
+                            if (Math.floor(label) === label) {
+                                return label;
+                            }
+                        },
                         fontSize: 24,
-                        fontColor: "white"
+                        fontColor: "white",
                     }
                 }],
                 xAxes: [{

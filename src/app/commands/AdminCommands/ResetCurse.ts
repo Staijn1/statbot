@@ -1,9 +1,10 @@
 import {Command, CommandMessage, Guard, Infos} from "@typeit/discord";
 import {NotBotMessage} from "../../guards/NotBot";
 import {IsAdminWithResponse} from "../../guards/IsAdminWithResponse";
-import {CREATE_DEFAULT_EMBED, CREATE_ERROR_EMBED, LOGGER, PREFIX, TIMEOUT} from "../../utils/constants";
+import {PREFIX, TIMEOUT} from "../../utils/constants";
 import {MessageEmbed} from "discord.js";
 import {curseService} from "../../services/CurseService";
+import {CREATE_DEFAULT_EMBED, CREATE_ERROR_EMBED, getUserId} from "../../utils/Functions";
 
 export abstract class ResetCurse {
 
@@ -16,7 +17,6 @@ export abstract class ResetCurse {
     })
     @Guard(NotBotMessage, IsAdminWithResponse)
     async resetCurse(message: CommandMessage): Promise<void> {
-        //todo make sure it also resets curseADay
         this.responseEmbed = CREATE_DEFAULT_EMBED("Success", "Altered curse count succesfully!");
         if (message.args.length > 2) {
             this.responseEmbed = CREATE_ERROR_EMBED('Error!', `Invalid amount or order of parameters! Use ${PREFIX}help for help`)
@@ -25,9 +25,10 @@ export abstract class ResetCurse {
         // No parameter is supplied if this is true. Reset all cursecounts.
         if (!message.args.username && !message.args.amount) {
 
-            const users = await curseService.find();
+            const users = await curseService.findAll();
             users.forEach(user => {
-                user.curseCount = 0;
+                user.curseCountAllTime = 0;
+                user.cursePerDay = []
                 curseService.update({userid: user.userid}, user);
             });
 
@@ -45,15 +46,13 @@ export abstract class ResetCurse {
     }
 
     private async updateUser(message: CommandMessage, amount: number): Promise<void> {
-        //todo restore with date
-        throw Error("Not implemented")
-        /*
-        const user = await curseService.findOne({userid: this.getUserId(message.args.username)});
+        const user = await curseService.findOne({userid: getUserId(message.args.username)});
         if (user) {
-            user.curseCount = amount;
+            user.curseCountAllTime = amount;
+            user.cursePerDay = []
             curseService.update({userid: user.userid}, user);
         } else {
             this.responseEmbed = CREATE_ERROR_EMBED("Error!", "User not found!")
-        }*/
+        }
     }
 }

@@ -6,13 +6,13 @@ export type CursePerDay = {
 export class CursePOJO {
     username: string;
     userid: string;
-    curseCount: number;
+    curseCountAllTime = 0;
     cursePerDay: CursePerDay[];
 
-    constructor(username: string, userid: string, curseCount: number, cursePerDay?: CursePerDay[]) {
+    constructor(username: string, userid: string,curseCountAllTime: number, cursePerDay?: CursePerDay[]) {
         this.username = username;
         this.userid = userid;
-        this.curseCount = curseCount;
+        if (curseCountAllTime) this.curseCountAllTime = curseCountAllTime;
         this.cursePerDay = cursePerDay;
     }
 }

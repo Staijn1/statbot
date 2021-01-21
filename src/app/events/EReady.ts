@@ -1,10 +1,11 @@
 import {On} from "@typeit/discord";
-import {ACTIVE_USER, constrain, CREATE_DEFAULT_EMBED, DATE_FORMAT, LOGGER} from "../utils/constants";
+import {ACTIVE_USER, CRON_SCHEDULE, DATE_FORMAT, LOGGER} from "../utils/constants";
 import {Main} from "../Main";
 import {onlineTimeService} from "../services/OnlineTimeService";
 import {UserPOJO} from "../pojo/UserPOJO";
 import {DateTime} from "luxon";
 import {curseService} from "../services/CurseService";
+import {constrain, CREATE_DEFAULT_EMBED} from "../utils/Functions";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const schedule = require("node-schedule")
@@ -27,26 +28,33 @@ export abstract class EReady {
                 }
             });
 
+            //Make old code (curseCount) compatible by transferring cursecount to today
             curseService.findOne({userid: guildMember.user.id}).then(curseUser => {
-                if (curseUser && !curseUser.cursePerDay){
-                    curseUser.cursePerDay = [{date: DateTime.local().toFormat(DATE_FORMAT), count: curseUser.curseCount}];
+                if (curseUser && !curseUser.cursePerDay) {
+                    curseUser.cursePerDay = [{
+                        date: DateTime.local().toFormat(DATE_FORMAT),
+                        count: curseUser.curseCountAllTime
+                    }];
+                    curseUser.curseCountAllTime = 0;
                     curseService.update({userid: curseUser.userid}, curseUser);
                 }
             })
         });
 
-        // 0 0 1 * *
-        // at 00:00 first day of the month
+
         // This function will fire at that time
-        schedule.scheduleJob('0 0 1 * *', async () => {
+        schedule.scheduleJob(CRON_SCHEDULE, async () => {
             LOGGER.info("Resetting message count and updating inactive count. It's the first of the month!")
-            //todo reset cursesADay aswell
-            const users = await onlineTimeService.find({});
+            const users = await onlineTimeService.findAll();
             users.forEach(user => {
                 if (user.messagesSent < ACTIVE_USER) {
-                    user.inactiveWarnings++;
-                    const guildName = Main.Client.guilds.cache.get(process.env.GUILD_TOKEN).name;
-                    guildMembers.get(user.userid).send(CREATE_DEFAULT_EMBED("Inactivity warning", `You have received an inactivity warning because you sent too few messages. You might get kicked if you are too inactive. To remove the warning, be more active this month.\n\nThis inactivity warning is for the server: ${guildName}`))
+                    try {
+                        user.inactiveWarnings++;
+                        const guildName = Main.Client.guilds.cache.get(process.env.GUILD_TOKEN).name;
+                        guildMembers.get(user.userid).send(CREATE_DEFAULT_EMBED("Inactivity warning", `You have received an inactivity warning because you sent too few messages. You might get kicked if you are too inactive. To remove the warning, be more active this month.\n\nThis inactivity warning is for the server: ${guildName}`))
+                    } catch (e) {
+                        LOGGER.error(`${e.message} || ${e.stack}`)
+                    }
                 } else {
                     user.inactiveWarnings = user.inactiveWarnings--;
                 }
@@ -55,6 +63,17 @@ export abstract class EReady {
                 user.messagesSent = 0;
                 onlineTimeService.update({userid: user.userid}, user);
             });
+
+            const curseUsers = await curseService.findAll();
+            for (const user of curseUsers) {
+                if (!user.cursePerDay) break;
+                for (const cursePerDay of user.cursePerDay) {
+                    user.curseCountAllTime += cursePerDay.count;
+                }
+                user.cursePerDay = [];
+                curseService.update({userid: user.userid}, user);
+            }
+            LOGGER.info("Resetting message count and updating inactive count. It's the first of the month!")
         })
         LOGGER.info('Bot started');
     }

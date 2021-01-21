@@ -1,7 +1,6 @@
 import {GuardFunction} from "@typeit/discord";
 import {MessageEmbed, Permissions} from "discord.js";
 import {ERROR_COLOR} from "../utils/constants";
-import {DateTime} from "luxon";
 
 /**
  * Checks if the user that sent the message is an admin. This is done by fetching the guild with ID, and then fetching the user in the guild using his user id

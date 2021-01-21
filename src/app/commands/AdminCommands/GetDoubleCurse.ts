@@ -1,8 +1,8 @@
-import {Command, CommandMessage, Description, Guard, Infos} from "@typeit/discord";
+import {Command, CommandMessage, Guard, Infos} from "@typeit/discord";
 import {NotBotMessage} from "../../guards/NotBot";
 import {IsAdminWithResponse} from "../../guards/IsAdminWithResponse";
 import {curseService} from "../../services/CurseService";
-import {CREATE_DEFAULT_EMBED} from "../../utils/constants";
+import {CREATE_DEFAULT_EMBED} from "../../utils/Functions";
 
 type WordCount = {
     word: string,

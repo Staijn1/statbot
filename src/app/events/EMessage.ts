@@ -22,7 +22,6 @@ export abstract class EMessage {
         const user = await curseService.findOne({userid: message.author.id,});
 
         if (user) {
-            user.curseCount += curseCount;
             // For backwards compatibleness
             if (!user.cursePerDay) user.cursePerDay = []
             const today = user.cursePerDay.find(day => day.date === DateTime.local().toFormat(DATE_FORMAT));
@@ -32,7 +31,7 @@ export abstract class EMessage {
 
             curseService.update({userid: message.author.id}, user);
         } else {
-            curseService.insert(new CursePOJO(message.author.username, message.author.id, curseCount, [
+            curseService.insert(new CursePOJO(message.author.username, message.author.id, 0, [
                 {
                     date: DateTime.local().toFormat(DATE_FORMAT),
                     count: curseCount

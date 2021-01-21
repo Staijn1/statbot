@@ -19,13 +19,14 @@ export abstract class DatabaseService {
 
     update(query: unknown, update: unknown, options = {}, callback = undefined): void {
         this.conn.update(query, update, options, callback);
+        this.conn.persistence.compactDatafile();
     }
 
     remove(query:unknown, options = {}): void {
         this.conn.remove(query, options);
     }
 
-    abstract find(options: unknown);
+    abstract findAll(options: unknown);
 
     abstract findOne(options: unknown);
 

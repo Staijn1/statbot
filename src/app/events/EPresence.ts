@@ -6,7 +6,6 @@ import {UserPOJO} from "../pojo/UserPOJO";
 import {DateTime} from "luxon";
 
 
-
 export abstract class EPresence {
 
     @On('presenceUpdate')

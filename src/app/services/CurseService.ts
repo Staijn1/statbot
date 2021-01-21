@@ -2,7 +2,7 @@ import * as path from "path";
 import * as fs from "fs";
 import {DatabaseService} from "./DatabaseService";
 import {CursePOJO} from "../pojo/CursePOJO";
-import {DESC} from "../utils/constants";
+import {LOGGER} from "../utils/constants";
 
 class CurseService extends DatabaseService {
     CURE_WORD_LIST_LOCATION = path.join(__dirname, "..", "..", "assets", "data", "curse.json");
@@ -47,11 +47,11 @@ class CurseService extends DatabaseService {
         return n;
     }
 
-    async find(sort = undefined): Promise<CursePOJO[]> {
+    async findAll(sort = undefined): Promise<CursePOJO[]> {
         const resultDatabase = await this.conn.find({}).sort(sort);
         const curses = [];
         resultDatabase.forEach(row => {
-            curses.push(new CursePOJO(row.username, row.userid, row.curseCount, row.cursePerDay));
+            curses.push(new CursePOJO(row.username, row.userid, row.curseCountAllTime, row.cursePerDay));
         });
 
         return curses;
@@ -59,7 +59,7 @@ class CurseService extends DatabaseService {
 
     async findOne(options: unknown): Promise<CursePOJO> {
         const result = await this.conn.findOne(options);
-        if (result) return new CursePOJO(result.username, result.userid, result.curseCount, result.cursePerDay);
+        if (result) return new CursePOJO(result.username, result.userid, result.curseCountAllTime, result.cursePerDay);
         else return undefined
     }
 
@@ -73,11 +73,28 @@ class CurseService extends DatabaseService {
 
     async getTopCursers(): Promise<CursePOJO[]> {
         const topCursers: CursePOJO[] = [];
-        const items = await this.conn.find({}).sort({curseCount: DESC}).limit(10).exec();
-        items.forEach(doc => {
-            topCursers.push(new CursePOJO(doc.username, doc.userid, doc.curseCount, doc.cursePerDay));
+        const items = await this.conn.find({}).exec();
+        items.forEach((doc, index) => {
+            topCursers[index] = new CursePOJO(doc.username, doc.userid, doc.curseCountAllTime, doc.cursePerDay);
+            let cursesThisMonth = 0;
+            try {
+                topCursers[index].cursePerDay.forEach(cursePerDay => {
+                    cursesThisMonth += cursePerDay.count;
+                });
+            } catch (e) {
+                if (e.message === 'Cannot read property \'forEach\' of undefined') {
+                    topCursers[index].cursePerDay = [];
+                    this.update({userid: topCursers[index].userid}, topCursers[index])
+                } else {
+                    LOGGER.error(`${e.message} || ${e.stack}`);
+                }
+            }
+
+            topCursers[index].curseCountAllTime += cursesThisMonth;
         })
-        return topCursers;
+
+        topCursers.sort((a, b) => b.curseCountAllTime - a.curseCountAllTime);
+        return topCursers.slice(0, 10);
     }
 }
 

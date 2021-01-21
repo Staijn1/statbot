@@ -12,7 +12,7 @@ class OnlineTimeService extends DatabaseService {
         super('activity.nedb')
     }
 
-    async find(sort = undefined, limit = undefined): Promise<UserPOJO[]> {
+    async findAll(sort = undefined, limit = undefined): Promise<UserPOJO[]> {
         const resultDatabase = await this.conn.find({}).sort(sort).limit(limit);
         const users = [];
         resultDatabase.forEach(row => {
@@ -42,7 +42,7 @@ class OnlineTimeService extends DatabaseService {
     }
 
     async getTopOnline(): Promise<UserPOJO[]> {
-        return this.find({totalMinutesOnline: DESC}, 10);
+        return this.findAll({totalMinutesOnline: DESC}, 10);
     }
 
     updateOnlineTimeOnlineUser(changedUser: UserPOJO) {
@@ -54,11 +54,11 @@ class OnlineTimeService extends DatabaseService {
     }
 
     async findMostActiveUsers(): Promise<UserPOJO[]> {
-        return this.find({messagesSent: DESC}, 10);
+        return this.findAll({messagesSent: DESC}, 10);
     }
 
     async getTopInactiveMembers() {
-        return this.find({inactiveWarnings: DESC});
+        return this.findAll({inactiveWarnings: DESC});
     }
 }
 

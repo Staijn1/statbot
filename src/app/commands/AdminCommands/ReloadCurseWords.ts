@@ -1,8 +1,9 @@
-import {Command, CommandMessage, Description, Guard, Infos} from "@typeit/discord";
+import {Command, CommandMessage, Guard, Infos} from "@typeit/discord";
 import {NotBotMessage} from "../../guards/NotBot";
 import {IsAdminWithResponse} from "../../guards/IsAdminWithResponse";
-import {CREATE_DEFAULT_EMBED, TIMEOUT} from "../../utils/constants";
+import {TIMEOUT} from "../../utils/constants";
 import {curseService} from "../../services/CurseService";
+import {CREATE_DEFAULT_EMBED} from "../../utils/Functions";
 
 export abstract class ReloadCurseWords {
 

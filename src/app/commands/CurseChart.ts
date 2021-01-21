@@ -1,9 +1,9 @@
 import {Command, CommandMessage, Description} from "@typeit/discord";
-import {CREATE_ERROR_EMBED, DATE_FORMAT, DEFAULT_COLOR_RGB, LOGGER, PREFIX} from "../utils/constants";
+import {DATE_FORMAT, DEFAULT_COLOR_RGB, LOGGER, possibleChartColors, PREFIX} from "../utils/constants";
 import {MessageAttachment} from "discord.js";
 import {ChartService} from "../services/ChartService";
 import {curseService} from "../services/CurseService";
-import {getUserId} from "../utils/Functions";
+import {CREATE_ERROR_EMBED, getUserId} from "../utils/Functions";
 import {DateTime} from "luxon";
 import {CursePOJO} from "../pojo/CursePOJO";
 import {ChartDataSets} from "chart.js";
@@ -27,8 +27,13 @@ export abstract class CurseChart {
 
         if (image) {
             const attachment = new MessageAttachment(image, 'chart.png');
-            await message.channel.send('', attachment);
-        }
+            try {
+                await message.channel.send('', attachment);
+            } catch (e) {
+                LOGGER.error(`${e.message} || ${e.stack}`)
+                await message.channel.send(CREATE_ERROR_EMBED("Error!", "Sorry, I couldn't send your chart"))
+            }
+        } else await message.channel.send(CREATE_ERROR_EMBED("Error!", "Sorry, I couldn't send your chart"))
     }
 
     private async handleUserChart(message: CommandMessage): Promise<Buffer> {
@@ -66,15 +71,6 @@ export abstract class CurseChart {
         return this.chartService.getBuffer();
     }
 
-    getRandomColor() {
-        const letters = '0123456789ABCDEF'.split('');
-        let color = '#';
-        for (let i = 0; i < 6; i++) {
-            color += letters[Math.floor(Math.random() * 16)];
-        }
-        return color;
-    }
-
     private async handleTop10Chart(message: CommandMessage): Promise<Buffer> {
         const top10Users = await curseService.getTopCursers();
         const labels = this.prepareLabels(top10Users);
@@ -89,21 +85,8 @@ export abstract class CurseChart {
     }
 
     private prepareDatasets(top10Users: CursePOJO[], labels: string[]) {
-        const possibleColors = [
-            '#FAD141',
-            '#D94B21',
-            '#C330F0',
-            '#216FD9',
-            '#26FC75',
-            '#c6f839',
-            '#D975D5',
-            '#88C6FC',
-            '#EAF59A',
-            '#C73C6C'
-        ];
-
         const datasets: ChartDataSets[] = [];
-        for (const [index,user] of top10Users.entries()) {
+        for (const [index, user] of top10Users.entries()) {
             const userDataPerDay = [];
             for (const label of labels) {
                 try {
@@ -118,7 +101,7 @@ export abstract class CurseChart {
                     userDataPerDay.push(null);
                 }
             }
-            const color = possibleColors[index];
+            const color = possibleChartColors[index];
             datasets.push({
                 label: `Curse count per day for ${user.username}`,
                 data: userDataPerDay,
@@ -140,16 +123,14 @@ export abstract class CurseChart {
 
 
         for (const user of top10Users) {
-            try {
-                for (const cursePerDay of user.cursePerDay) {
-                    const date = DateTime.fromFormat(cursePerDay.date, DATE_FORMAT);
-                    const difference = earliestDate.diff(date, 'days').days;
-                    if (difference > 0) {
-                        earliestDate = date;
-                    }
+            if (!user.cursePerDay) break;
+
+            for (const cursePerDay of user.cursePerDay) {
+                const date = DateTime.fromFormat(cursePerDay.date, DATE_FORMAT);
+                const difference = earliestDate.diff(date, 'days').days;
+                if (difference > 0) {
+                    earliestDate = date;
                 }
-            } catch (e) {
-                LOGGER.error(`${e.message} || ${e.stack}`);
             }
         }
 

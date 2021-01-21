@@ -1,7 +1,8 @@
 import {Command, CommandMessage, Description} from "@typeit/discord";
-import {CREATE_DEFAULT_EMBED, LOGGER} from "../utils/constants";
+import {LOGGER} from "../utils/constants";
 import {onlineTimeService} from "../services/OnlineTimeService";
 import {Duration} from "luxon";
+import {CREATE_DEFAULT_EMBED} from "../utils/Functions";
 
 export abstract class GetTopOnlineUsers {
 
@@ -9,7 +10,7 @@ export abstract class GetTopOnlineUsers {
     @Description("get the top online users. losers.")
     async showTop10OnlineUsers(message: CommandMessage): Promise<void> {
         const embed = CREATE_DEFAULT_EMBED("Top 10 Online Users", "Times are sum of all online time");
-        const users = await onlineTimeService.find();
+        const users = await onlineTimeService.findAll();
         users.forEach(user => {
             onlineTimeService.updateOnlineTimeOnlineUser(user);
         });
