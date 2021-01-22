@@ -1,8 +1,9 @@
-import {Client, Command, CommandInfos, CommandMessage, Description} from "@typeit/discord";
-import {MessageEmbed, Permissions} from "discord.js";
-import {DEFAULT_COLOR} from "../utils/constants";
+import {Client, Command, CommandMessage, Infos} from "@typeit/discord";
+import {MessageEmbed} from "discord.js";
+import {CREATE_DEFAULT_EMBED, CREATE_ERROR_EMBED, isModBasedOnMessage} from "../utils/Functions";
 
 export abstract class Help {
+    /*
     @Command("help")
     @Description("get some help.")
     async help(message: CommandMessage): Promise<void> {
@@ -46,5 +47,55 @@ export abstract class Help {
 
     private handleUserHelp(): CommandInfos<unknown>[] {
         return Client.getCommands().filter(command => !command.infos.forAdmins)
+    }
+     */
+
+    @Command("help :page")
+    @Infos({description: "get some help.", show: false, page: 0})
+    async help(command: CommandMessage): Promise<void> {
+        let response = CREATE_DEFAULT_EMBED("Statbot Commands", "Get help for the commands here!")
+        let page;
+
+        if (command.args.page && typeof command.args.page == "number") {
+            page = command.args.page;
+        } else {
+            page = 0;
+        }
+
+        if (page === 3 && !isModBasedOnMessage(command)) {
+            response = CREATE_ERROR_EMBED("Error!", "Sorry you do not have access to view this page!");
+            await command.channel.send(response);
+            return;
+        }
+
+
+        const availableCommands = Client.getCommands().filter(command => command.infos.page === page);
+        if (page == 0) response = this.showDefaultPage(command);
+        else {
+            for (const command of availableCommands) {
+                response.addField(`${command.prefix}${command.commandName}`, command.description)
+            }
+        }
+
+
+        await command.channel.send(response);
+    }
+
+    private showDefaultPage(message: CommandMessage): MessageEmbed {
+        const messageEmbed = CREATE_DEFAULT_EMBED("StatBot Help", "Get some help here. Categories:");
+        messageEmbed.addFields([
+            {
+                name: ':level_slider: General statistics ── ``page 1``',
+                value: "Some general statistics, like curse count or top online users"
+            },
+            {
+                name: ':chart_with_upwards_trend: Charts ── ``page 2``',
+                value: "Some general statistics, like curse count or top online users"
+            },
+        ]);
+
+        if (isModBasedOnMessage(message)) messageEmbed.addField(":tools: Admin commands ── ``page 3``", "These commands are for admins only\n\n");
+
+        return messageEmbed;
     }
 }

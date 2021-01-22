@@ -1,4 +1,4 @@
-import {Command, CommandMessage, Description} from "@typeit/discord";
+import {Command, CommandMessage, Infos} from "@typeit/discord";
 import {DATE_FORMAT, DEFAULT_COLOR_RGB, LOGGER, possibleChartColors, PREFIX} from "../utils/constants";
 import {MessageAttachment} from "discord.js";
 import {ChartService} from "../services/ChartService";
@@ -13,10 +13,11 @@ export abstract class CurseChart {
     chartService = new ChartService();
 
     @Command("curseChart :user")
-    @Description(`Get a curse chart
-     Formats:\n
-     ${PREFIX}curseChart | Gets all amount of curses per day in the last month\n
-     ${PREFIX}resetCurse @User | Gets the curse count per day of the tagged user\n`)
+    @Infos({
+        description: `Get a curse chart. Formats:\n${PREFIX}curseChart | Gets all amount of curses per day in the last month\n${PREFIX}resetCurse @User | Gets the curse count per day of the tagged user\n`,
+        page: 2,
+        admin: false,
+    })
     async showCurseChart(message: CommandMessage): Promise<void> {
         let image: Buffer;
         if (message.args.user) {

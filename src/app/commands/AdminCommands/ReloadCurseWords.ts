@@ -8,7 +8,11 @@ import {CREATE_DEFAULT_EMBED} from "../../utils/Functions";
 export abstract class ReloadCurseWords {
 
     @Command("reloadCurse")
-    @Infos({forAdmins: true, description: "Reloads the cursewords"})
+    @Infos({
+        description: "Reloads the list of cursewords that get checked",
+        page: 3,
+        admin: true
+    })
     @Guard(NotBotMessage, IsAdminWithResponse)
     reloadCurseFile(message: CommandMessage): void {
         curseService.loadWords();

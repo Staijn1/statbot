@@ -10,7 +10,7 @@ import {PREFIX} from "./utils/constants";
 })
 export abstract class StatBot {
     @CommandNotFound()
-    notFound(message: CommandMessage): void {
-        message.channel.send("Command not found, please get some help");
+    async notFound(message: CommandMessage): Promise<void> {
+        await message.channel.send(`Command not found, if you need help, use ${PREFIX}help`);
     }
 }

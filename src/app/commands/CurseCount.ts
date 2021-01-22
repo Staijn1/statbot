@@ -1,4 +1,4 @@
-import {Command, CommandMessage, Description} from "@typeit/discord";
+import {Command, CommandMessage, Infos} from "@typeit/discord";
 import {LOGGER} from "../utils/constants";
 import {curseService} from "../services/CurseService";
 import {CursePOJO} from "../pojo/CursePOJO";
@@ -6,7 +6,11 @@ import {CREATE_DEFAULT_EMBED} from "../utils/Functions";
 
 export abstract class CurseCount {
     @Command("curse")
-    @Description("These are the most profane users")
+    @Infos({
+        description: "These are the most profane users",
+        page: 1,
+        admin: false,
+    })
     async showCurseCount(message: CommandMessage): Promise<void> {
         const response = CREATE_DEFAULT_EMBED("Top 10 Profane Users", "");
 

@@ -1,4 +1,4 @@
-import {Command, CommandMessage, Description} from "@typeit/discord";
+import {Command, CommandMessage, Description, Infos} from "@typeit/discord";
 import {LOGGER} from "../utils/constants";
 import {onlineTimeService} from "../services/OnlineTimeService";
 import {CREATE_DEFAULT_EMBED} from "../utils/Functions";
@@ -6,7 +6,11 @@ import {CREATE_DEFAULT_EMBED} from "../utils/Functions";
 export abstract class GetTopActiveUsers {
 
     @Command("topactive")
-    @Description("Get the top active users based on messages.")
+    @Infos({
+        description: "Get the top active users based on messages, this month.",
+        page: 1,
+        admin: false
+    })
     async showTopActiveUsers(message: CommandMessage): Promise<void> {
         const embed = CREATE_DEFAULT_EMBED("Top 10 Active Users", "The count of messages in this month.")
         const users = await onlineTimeService.findMostActiveUsers();

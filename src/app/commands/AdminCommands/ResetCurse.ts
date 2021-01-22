@@ -12,8 +12,9 @@ export abstract class ResetCurse {
 
     @Command("resetCurse :username :amount")
     @Infos({
-        forAdmins: true,
-        description: `Resets the curse counter. Formats:\n${PREFIX}resetCurse | Resets all users curse stats\n${PREFIX}resetCurse @User | Resets the user curse count to 0\n${PREFIX}resetCurse @User 100 | Sets user to 100`
+        description: `Resets the curse counter. Formats:\n${PREFIX}resetCurse | Resets all users curse stats\n${PREFIX}resetCurse @User | Resets the user curse count to 0\n${PREFIX}resetCurse @User 100 | Sets user to 100`,
+        admin: true,
+        page: 3,
     })
     @Guard(NotBotMessage, IsAdminWithResponse)
     async resetCurse(message: CommandMessage): Promise<void> {

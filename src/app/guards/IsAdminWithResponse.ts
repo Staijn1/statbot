@@ -1,6 +1,7 @@
 import {GuardFunction} from "@typeit/discord";
-import {MessageEmbed, Permissions} from "discord.js";
+import {MessageEmbed} from "discord.js";
 import {ERROR_COLOR} from "../utils/constants";
+import {isModBasedOnMessage} from "../utils/Functions";
 
 /**
  * Checks if the user that sent the message is an admin. This is done by fetching the guild with ID, and then fetching the user in the guild using his user id
@@ -16,19 +17,14 @@ export const IsAdminWithResponse: GuardFunction<"message"> = async (
     client,
     next
 ) => {
-    const guild = client.guilds.cache.get(message.guild.id);
-    const guildMember = guild.members.cache.get(message.author.id);
-    const permissions = guildMember.permissions.bitfield;
-    const permissionToCheck = Permissions.FLAGS.BAN_MEMBERS;
-
-    const isMod = (permissions & permissionToCheck) === permissionToCheck;
+    const isMod = isModBasedOnMessage(message)
     if (isMod) {
         await next();
-    } else{
+    } else {
         const response = new MessageEmbed();
         response.setTitle("Permission denied!")
             .setColor(ERROR_COLOR)
             .setDescription("You are not authorized to execute this command!");
-        message.channel.send(response);
+        await message.channel.send(response);
     }
 }

@@ -12,7 +12,11 @@ type WordCount = {
 export abstract class GetDoubleCurse {
 
     @Command("doubleCurse")
-    @Infos({forAdmins: true, description: "Get double curse words in the curse list"})
+    @Infos({
+        description: "Get double curse words in the curse list",
+        page: 3,
+        admin: true
+    })
     @Guard(NotBotMessage, IsAdminWithResponse)
     async calculateDoubleCurses(message: CommandMessage): Promise<void> {
         const response = CREATE_DEFAULT_EMBED("Double words are: ", "These words are double or include other words. Remove them for better performance. Fuck is equal to fucker")

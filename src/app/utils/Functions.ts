@@ -1,5 +1,13 @@
 import {DEFAULT_COLOR, ERROR_COLOR, LOGGER} from "./constants";
-import {MessageEmbed} from "discord.js";
+import {Message, MessageEmbed, Permissions} from "discord.js";
+
+export function isModBasedOnMessage(message: Message): boolean {
+    const guildMember = message.guild.members.cache.get(message.author.id);
+    const permissions = guildMember.permissions.bitfield;
+    const permissionToCheck = Permissions.FLAGS.BAN_MEMBERS;
+
+    return (permissions & permissionToCheck) === permissionToCheck;
+}
 
 /**
  * Filter out the <@! and > in the strings, leaving only numbers (userid). Join them from one array into a string
@@ -13,6 +21,7 @@ export function getUserId(garbledUserId: string): string {
         return undefined;
     }
 }
+
 export const CREATE_ERROR_EMBED = (title, message) => {
     return new MessageEmbed().setTitle(title).setDescription(message).setColor(ERROR_COLOR)
 }

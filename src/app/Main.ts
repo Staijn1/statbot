@@ -19,7 +19,6 @@ export class Main {
                 `${__dirname}/*.js`,
             ]
         });
-
         this._client.login(process.env.TOKEN,);
     }
 }
