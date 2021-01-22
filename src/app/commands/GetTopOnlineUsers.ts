@@ -6,7 +6,7 @@ import {CREATE_DEFAULT_EMBED} from "../utils/Functions";
 
 export abstract class GetTopOnlineUsers {
 
-    @Command("topOnline")
+    @Command("toponline")
     @Infos({
         description: "Get the top online users",
         page: 1,

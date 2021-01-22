@@ -12,7 +12,7 @@ import {ChartDataSets} from "chart.js";
 export abstract class CurseChart {
     chartService = new ChartService();
 
-    @Command("curseChart :user")
+    @Command("cursechart :user")
     @Infos({
         description: `Get a curse chart. Formats:\n${PREFIX}curseChart | Gets all amount of curses per day in the last month\n${PREFIX}resetCurse @User | Gets the curse count per day of the tagged user\n`,
         page: 2,

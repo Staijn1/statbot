@@ -11,7 +11,7 @@ type WordCount = {
 
 export abstract class GetDoubleCurse {
 
-    @Command("doubleCurse")
+    @Command("doublecurse")
     @Infos({
         description: "Get double curse words in the curse list",
         page: 3,

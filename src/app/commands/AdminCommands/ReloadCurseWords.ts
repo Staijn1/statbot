@@ -7,7 +7,7 @@ import {CREATE_DEFAULT_EMBED} from "../../utils/Functions";
 
 export abstract class ReloadCurseWords {
 
-    @Command("reloadCurse")
+    @Command("reloadcurse")
     @Infos({
         description: "Reloads the list of cursewords that get checked",
         page: 3,

@@ -10,7 +10,7 @@ export abstract class ResetCurse {
 
     responseEmbed: MessageEmbed;
 
-    @Command("resetCurse :username :amount")
+    @Command("resetcurse :username :amount")
     @Infos({
         description: `Resets the curse counter. Formats:\n${PREFIX}resetCurse | Resets all users curse stats\n${PREFIX}resetCurse @User | Resets the user curse count to 0\n${PREFIX}resetCurse @User 100 | Sets user to 100`,
         admin: true,
