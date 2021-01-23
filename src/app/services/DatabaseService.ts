@@ -3,7 +3,7 @@ import path from "path";
 
 export abstract class DatabaseService {
     protected conn;
-    private readonly baseUrl = path.join(__dirname,'..', '..','/assets/data/')
+    private readonly baseUrl = path.join(__dirname, '..', '..', '/assets/data/')
 
     protected constructor(fileUrl: string) {
         this.conn = Datastore.create({
@@ -22,13 +22,11 @@ export abstract class DatabaseService {
         this.conn.persistence.compactDatafile();
     }
 
-    remove(query:unknown, options = {}): void {
+    remove(query: unknown, options = {}): void {
         this.conn.remove(query, options);
     }
 
-    abstract findAll(options: unknown);
+    abstract findAll(options: unknown):unknown;
 
-    abstract findOne(options: unknown);
-
-
+    abstract findOne(options: unknown):unknown;
 }
