@@ -39,7 +39,7 @@ export class ChartService {
                         beginAtZero: true,
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         //@ts-ignore
-                        userCallback: function (label, index, labels) {
+                        userCallback: function (label) {
                             if (Math.floor(label) === label) {
                                 return label;
                             }
@@ -172,7 +172,7 @@ export class ChartService {
         return this.getBuffer();
     }
 
-    prepareDatasets(top10Users: CursePOJO[] | UserPOJO[], labels: string[], partialLabelString: string) {
+    prepareDatasets(top10Users: CursePOJO[] | UserPOJO[], labels: string[], partialLabelString: string): ChartDataSets[] {
         const datasets: ChartDataSets[] = [];
         for (const [index, user] of top10Users.entries()) {
             const userDataPerDay = this.prepareData(labels, user);
