@@ -16,7 +16,7 @@ export abstract class EPresence {
 
         // If this user does not exist yet and went online, add him
         if (!changedUser && onlineTimeService.isOnline(newPresence)) {
-            onlineTimeService.addUserActivities(new UserPOJO(newPresence.user.username, newPresence.user.id, 0, DateTime.local().toISO(), true, 0, 0));
+            onlineTimeService.addUserActivities(new UserPOJO(newPresence.user.username, newPresence.user.id, 0, DateTime.local().toISO(), true, 0, 0, []));
             return;
         } else if(!changedUser) return;
 

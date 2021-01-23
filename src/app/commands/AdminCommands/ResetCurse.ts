@@ -4,7 +4,7 @@ import {IsAdminWithResponse} from "../../guards/IsAdminWithResponse";
 import {PREFIX, TIMEOUT} from "../../utils/constants";
 import {MessageEmbed} from "discord.js";
 import {curseService} from "../../services/CurseService";
-import {CREATE_DEFAULT_EMBED, CREATE_ERROR_EMBED, getUserId} from "../../utils/Functions";
+import {CREATE_DEFAULT_EMBED, CREATE_ERROR_EMBED, getUserId} from "../../utils/functions";
 
 export abstract class ResetCurse {
 
@@ -29,7 +29,7 @@ export abstract class ResetCurse {
             const users = await curseService.findAll();
             users.forEach(user => {
                 user.curseCountAllTime = 0;
-                user.cursePerDay = []
+                user.countPerDays = []
                 curseService.update({userid: user.userid}, user);
             });
 
@@ -50,7 +50,7 @@ export abstract class ResetCurse {
         const user = await curseService.findOne({userid: getUserId(message.args.username)});
         if (user) {
             user.curseCountAllTime = amount;
-            user.cursePerDay = []
+            user.countPerDays = []
             curseService.update({userid: user.userid}, user);
         } else {
             this.responseEmbed = CREATE_ERROR_EMBED("Error!", "User not found!")

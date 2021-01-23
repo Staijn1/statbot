@@ -1,6 +1,6 @@
 import {Client, Command, CommandMessage, Infos} from "@typeit/discord";
 import {MessageEmbed} from "discord.js";
-import {CREATE_DEFAULT_EMBED, CREATE_ERROR_EMBED, isModBasedOnMessage} from "../utils/Functions";
+import {CREATE_DEFAULT_EMBED, CREATE_ERROR_EMBED, isModBasedOnMessage} from "../utils/functions";
 
 export abstract class Help {
     /*
@@ -69,11 +69,11 @@ export abstract class Help {
         }
 
 
-        const availableCommands = Client.getCommands().filter(command => command.infos.page === page);
+        const availableCommands = Client.getCommands().filter(registeredCommand => registeredCommand.infos.page === page);
         if (page == 0) response = this.showDefaultPage(command);
         else {
-            for (const command of availableCommands) {
-                response.addField(`${command.prefix}${command.commandName}`, command.description)
+            for (const availableCommand of availableCommands) {
+                response.addField(`${availableCommand.prefix}${availableCommand.commandName}`, availableCommand.description)
             }
         }
 

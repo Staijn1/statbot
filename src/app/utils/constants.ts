@@ -28,7 +28,7 @@ export const DATE_FORMAT = 'dd-MM-yyyy';
 // 0 0 1 * *
 // at 00:00 first day of the month
 export const CRON_SCHEDULE = '0 0 1 * *';
-
+// export const CRON_SCHEDULE = '* * * * *'
 export const possibleChartColors = [
     '#FAD141',
     '#D94B21',

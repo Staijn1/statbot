@@ -1,7 +1,7 @@
 import {GuardFunction} from "@typeit/discord";
 import {MessageEmbed} from "discord.js";
 import {ERROR_COLOR} from "../utils/constants";
-import {isModBasedOnMessage} from "../utils/Functions";
+import {isModBasedOnMessage} from "../utils/functions";
 
 /**
  * Checks if the user that sent the message is an admin. This is done by fetching the guild with ID, and then fetching the user in the guild using his user id

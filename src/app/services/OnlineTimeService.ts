@@ -1,22 +1,19 @@
-import * as path from "path";
 import {DatabaseService} from "./DatabaseService";
 import {Presence} from "discord.js";
 import {UserPOJO} from "../pojo/UserPOJO";
 import {DateTime} from "luxon";
 import {DESC} from "../utils/constants";
 
-class OnlineTimeService extends DatabaseService {
-    FILE_LOCATION = path.join(__dirname, "..", "..", "assets", "data", "activity.json");
-
-    constructor() {
-        super('activity.nedb')
+export class OnlineTimeService extends DatabaseService {
+    constructor(fileurl?: string) {
+        super(fileurl ?? 'activity.nedb')
     }
 
     async findAll(sort = undefined, limit = undefined): Promise<UserPOJO[]> {
         const resultDatabase = await this.conn.find({}).sort(sort).limit(limit);
         const users = [];
         resultDatabase.forEach(row => {
-            users.push(new UserPOJO(row.username, row.userid, row.totalMinutesOnline, row.onlineSince, row.isOnline, row.messagesSent, row.inactiveWarnings))
+            users.push(new UserPOJO(row.username, row.userid, row.totalMinutesOnline, row.onlineSince, row.isOnline, row.messagesSentAllTime, row.inactiveWarnings, row.countPerDays))
         });
 
         return users;
@@ -24,7 +21,7 @@ class OnlineTimeService extends DatabaseService {
 
     async findOne(options: unknown): Promise<UserPOJO> {
         const result = await this.conn.findOne(options);
-        if (result) return new UserPOJO(result.username, result.userid, result.totalMinutesOnline, result.onlineSince, result.isOnline, result.messagesSent, result.inactiveWarnings);
+        if (result) return new UserPOJO(result.username, result.userid, result.totalMinutesOnline, result.onlineSince, result.isOnline, result.messagesSentAllTime, result.inactiveWarnings, result.countPerDays);
         else return undefined
     }
 
@@ -53,8 +50,21 @@ class OnlineTimeService extends DatabaseService {
         onlineTimeService.update({userid: changedUser.userid}, changedUser);
     }
 
-    async findMostActiveUsers(): Promise<UserPOJO[]> {
-        return this.findAll({messagesSent: DESC}, 10);
+    async getMostActiveThisMonth(): Promise<UserPOJO[]> {
+        const topActive = await this.findAll({messagesSent: DESC});
+        topActive.forEach(user => {
+            if (user.countPerDays) {
+                user.messagesSentAllTime = 0;
+                user.countPerDays.forEach(day => {
+                    user.messagesSentAllTime += day.count;
+                })
+            }
+        });
+
+        topActive.sort((a, b) => {
+            return b.messagesSentAllTime - a.messagesSentAllTime;
+        })
+        return topActive;
     }
 
     async getTopInactiveMembers() {

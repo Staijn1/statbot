@@ -23,10 +23,10 @@ export abstract class EMessage {
 
         if (user) {
             // For backwards compatibleness
-            if (!user.cursePerDay) user.cursePerDay = []
-            const today = user.cursePerDay.find(day => day.date === DateTime.local().toFormat(DATE_FORMAT));
+            if (!user.countPerDays) user.countPerDays = []
+            const today = user.countPerDays.find(day => day.date === DateTime.local().toFormat(DATE_FORMAT));
 
-            if (!today) user.cursePerDay.push({date: DateTime.local().toFormat(DATE_FORMAT), count: curseCount});
+            if (!today) user.countPerDays.push({date: DateTime.local().toFormat(DATE_FORMAT), count: curseCount});
             else today.count += curseCount;
 
             curseService.update({userid: message.author.id}, user);
@@ -47,10 +47,12 @@ export abstract class EMessage {
     private async handleMessageCount(message: Message): Promise<void> {
         const user = await onlineTimeService.findOne({userid: message.author.id});
         if (user) {
-            user.messagesSent++;
-            await onlineTimeService.update({userid: user.userid}, user);
+            const todayObject = user.countPerDays.find(day => day.date === DateTime.local().toFormat(DATE_FORMAT));
+            if (todayObject) todayObject.count++;
+            else user.countPerDays.push({date: DateTime.local().toFormat(DATE_FORMAT), count: 1})
+            onlineTimeService.update({userid: user.userid}, user);
         } else if (onlineTimeService.isOnline(message.author.presence)) {
-            await onlineTimeService.insert(new UserPOJO(message.author.username, message.author.username, 0, DateTime.local().toISO(), true, 1, 0))
+            onlineTimeService.insert(new UserPOJO(message.author.username, message.author.username, 0, DateTime.local().toISO(), true, 1, 0, []))
         }
     }
 }

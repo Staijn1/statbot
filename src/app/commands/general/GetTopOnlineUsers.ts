@@ -1,8 +1,8 @@
 import {Command, CommandMessage, Infos} from "@typeit/discord";
-import {LOGGER} from "../utils/constants";
-import {onlineTimeService} from "../services/OnlineTimeService";
+import {LOGGER} from "../../utils/constants";
+import {onlineTimeService} from "../../services/OnlineTimeService";
 import {Duration} from "luxon";
-import {CREATE_DEFAULT_EMBED} from "../utils/Functions";
+import {CREATE_DEFAULT_EMBED} from "../../utils/functions";
 
 export abstract class GetTopOnlineUsers {
 
@@ -22,8 +22,8 @@ export abstract class GetTopOnlineUsers {
 
         if (sortedUsers.length > 0) {
             try {
-                const member = await message.guild.members.cache.get(sortedUsers[0].userid);
-                embed.setThumbnail(member.user.displayAvatarURL());
+                const guildMember = message.guild.members.cache.get(sortedUsers[0].userid);
+                embed.setThumbnail(guildMember.user.displayAvatarURL());
             } catch (e) {
                 LOGGER.error(`${e.message} || ${e.stack}`)
             }

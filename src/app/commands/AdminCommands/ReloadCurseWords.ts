@@ -3,7 +3,7 @@ import {NotBotMessage} from "../../guards/NotBot";
 import {IsAdminWithResponse} from "../../guards/IsAdminWithResponse";
 import {TIMEOUT} from "../../utils/constants";
 import {curseService} from "../../services/CurseService";
-import {CREATE_DEFAULT_EMBED} from "../../utils/Functions";
+import {CREATE_DEFAULT_EMBED} from "../../utils/functions";
 
 export abstract class ReloadCurseWords {
 
@@ -14,12 +14,13 @@ export abstract class ReloadCurseWords {
         admin: true
     })
     @Guard(NotBotMessage, IsAdminWithResponse)
-    reloadCurseFile(message: CommandMessage): void {
+    async reloadCurseFile(message: CommandMessage): Promise<void> {
         curseService.loadWords();
-        const response = CREATE_DEFAULT_EMBED("Success", "Successfully reload the curse list!")
-        message.channel.send(response).then(response => {
-            message.delete({timeout: TIMEOUT})
-            response.delete({timeout: TIMEOUT})
-        });
+        const responseToSend = CREATE_DEFAULT_EMBED("Success", "Successfully reload the curse list!")
+        const responseSent = await message.channel.send(responseToSend);
+        setTimeout(async () => {
+            await message.delete();
+            await responseSent.delete();
+        }, TIMEOUT);
     }
 }

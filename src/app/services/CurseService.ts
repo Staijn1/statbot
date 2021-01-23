@@ -51,7 +51,7 @@ class CurseService extends DatabaseService {
         const resultDatabase = await this.conn.find({}).sort(sort);
         const curses = [];
         resultDatabase.forEach(row => {
-            curses.push(new CursePOJO(row.username, row.userid, row.curseCountAllTime, row.cursePerDay));
+            curses.push(new CursePOJO(row.username, row.userid, row.curseCountAllTime, row.countPerDays));
         });
 
         return curses;
@@ -59,7 +59,7 @@ class CurseService extends DatabaseService {
 
     async findOne(options: unknown): Promise<CursePOJO> {
         const result = await this.conn.findOne(options);
-        if (result) return new CursePOJO(result.username, result.userid, result.curseCountAllTime, result.cursePerDay);
+        if (result) return new CursePOJO(result.username, result.userid, result.curseCountAllTime, result.countPerDays);
         else return undefined
     }
 
@@ -71,19 +71,19 @@ class CurseService extends DatabaseService {
         return curseCount;
     }
 
-    async getTopCursers(): Promise<CursePOJO[]> {
+    async getTopCursersOfAllTime(): Promise<CursePOJO[]> {
         const topCursers: CursePOJO[] = [];
         const items = await this.conn.find({}).exec();
         items.forEach((doc, index) => {
-            topCursers[index] = new CursePOJO(doc.username, doc.userid, doc.curseCountAllTime, doc.cursePerDay);
+            topCursers[index] = new CursePOJO(doc.username, doc.userid, doc.curseCountAllTime, doc.countPerDays);
             let cursesThisMonth = 0;
             try {
-                topCursers[index].cursePerDay.forEach(cursePerDay => {
-                    cursesThisMonth += cursePerDay.count;
+                topCursers[index].countPerDays.forEach(day => {
+                    cursesThisMonth += day.count;
                 });
             } catch (e) {
                 if (e.message === 'Cannot read property \'forEach\' of undefined') {
-                    topCursers[index].cursePerDay = [];
+                    topCursers[index].countPerDays = [];
                     this.update({userid: topCursers[index].userid}, topCursers[index])
                 } else {
                     LOGGER.error(`${e.message} || ${e.stack}`);
@@ -94,7 +94,32 @@ class CurseService extends DatabaseService {
         })
 
         topCursers.sort((a, b) => b.curseCountAllTime - a.curseCountAllTime);
-        return topCursers.slice(0, 10);
+        return topCursers;
+    }
+    async getTopCursersOfThisMonth(): Promise<CursePOJO[]> {
+        const topCursers: CursePOJO[] = [];
+        const items = await this.conn.find({}).exec();
+        items.forEach((doc, index) => {
+            topCursers[index] = new CursePOJO(doc.username, doc.userid, doc.curseCountAllTime, doc.countPerDays);
+            let cursesThisMonth = 0;
+            try {
+                topCursers[index].countPerDays.forEach(day => {
+                    cursesThisMonth += day.count;
+                });
+            } catch (e) {
+                if (e.message === 'Cannot read property \'forEach\' of undefined') {
+                    topCursers[index].countPerDays = [];
+                    this.update({userid: topCursers[index].userid}, topCursers[index])
+                } else {
+                    LOGGER.error(`${e.message} || ${e.stack}`);
+                }
+            }
+            topCursers[index].curseCountAllTime = 0;
+            topCursers[index].curseCountAllTime += cursesThisMonth;
+        })
+
+        topCursers.sort((a, b) => b.curseCountAllTime - a.curseCountAllTime);
+        return topCursers;
     }
 }
 
