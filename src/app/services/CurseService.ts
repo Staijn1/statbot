@@ -96,6 +96,7 @@ class CurseService extends DatabaseService {
         topCursers.sort((a, b) => b.curseCountAllTime - a.curseCountAllTime);
         return topCursers;
     }
+
     async getTopCursersOfThisMonth(): Promise<CursePOJO[]> {
         const topCursers: CursePOJO[] = [];
         const items = await this.conn.find({}).exec();
@@ -122,5 +123,7 @@ class CurseService extends DatabaseService {
         return topCursers;
     }
 }
+
+export class CurseServiceTest extends CurseService {}
 
 export const curseService = new CurseService();

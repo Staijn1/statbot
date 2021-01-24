@@ -72,4 +72,7 @@ class OnlineTimeService extends DatabaseService {
     }
 }
 
+export class OnlineTimeServiceTest extends OnlineTimeService {
+}
+
 export const onlineTimeService = new OnlineTimeService();
