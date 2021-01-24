@@ -5,7 +5,7 @@ import {CursePOJO} from "../pojo/CursePOJO";
 import {DATE_FORMAT, DEFAULT_COLOR_RGB, LOGGER, possibleChartColors} from "../utils/constants";
 import {DateTime} from "luxon";
 import {CommandMessage} from "@typeit/discord";
-import {CREATE_ERROR_EMBED} from "../utils/functions";
+import {CREATE_DEFAULT_EMBED, CREATE_ERROR_EMBED} from "../utils/functions";
 import {Message, MessageAttachment} from "discord.js";
 
 export class ChartService {
@@ -193,11 +193,13 @@ export class ChartService {
     }
 
     async sendChart(message: CommandMessage, image: Buffer): Promise<Message> {
+        const response = CREATE_DEFAULT_EMBED("\n", "");
         let sentMessage;
         if (image) {
             const attachment = new MessageAttachment(image, 'chart.png');
+            response.setImage('attachment://chart.png');
             try {
-                await message.channel.send('', attachment);
+                await message.channel.send({ files: [attachment], embed: response });
             } catch (e) {
                 LOGGER.error(`${e.message} || ${e.stack}`)
                 sentMessage = await message.channel.send(CREATE_ERROR_EMBED("Error!", "Sorry, I couldn't send your chart"))
