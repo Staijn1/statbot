@@ -5,14 +5,16 @@ import {DateTime} from "luxon";
 
 
 jest.disableAutomock();
-const sut = new OnlineTimeService('mocks/mockedactivity.nedb')
-test('should not return user when userid is not found', () => {
-    const result = sut.findOne({userid: '1234'});
-    expect(result).toBeFalsy();
+const sut = new OnlineTimeService('mocks/mockedactivity.nedb');
+
+
+test('should not return user when userid is not found', async () => {
+    const result = await sut.findOne({userid: '1234'});
+    expect(result).toBeUndefined();
 });
 
-test('should return userPOJO when userid is found', () => {
-    const result = sut.findOne({userid: '363384101794873354'});
+test('should return userPOJO when userid is found', async () => {
+    const result = await sut.findOne({userid: '363384101794873354'});
     expect(result).toBeTruthy();
     expect(result).toBeInstanceOf(UserPOJO);
 });

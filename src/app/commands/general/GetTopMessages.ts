@@ -4,7 +4,6 @@ import {onlineTimeService} from "../../services/OnlineTimeService";
 import {CREATE_DEFAULT_EMBED} from "../../utils/functions";
 
 export abstract class GetTopActiveUsers {
-
     @Command("topactive")
     @Infos({
         description: "Get the top active users based on messages, of all time",

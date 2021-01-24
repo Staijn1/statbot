@@ -1,8 +1,8 @@
 import {Command, CommandMessage, Guard, Infos} from "@typeit/discord";
 import {NotBotMessage} from "../../guards/NotBot";
 import {IsAdminWithResponse} from "../../guards/IsAdminWithResponse";
-import {curseService} from "../../services/CurseService";
 import {CREATE_DEFAULT_EMBED} from "../../utils/functions";
+import {curseService} from "../../services/CurseService";
 
 type WordCount = {
     word: string,
@@ -10,7 +10,6 @@ type WordCount = {
 }
 
 export abstract class GetDoubleCurse {
-
     @Command("doublecurse")
     @Infos({
         description: "Get double curse words in the curse list",

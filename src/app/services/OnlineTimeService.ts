@@ -4,7 +4,7 @@ import {UserPOJO} from "../pojo/UserPOJO";
 import {DateTime} from "luxon";
 import {DESC} from "../utils/constants";
 
-export class OnlineTimeService extends DatabaseService {
+class OnlineTimeService extends DatabaseService {
     constructor(fileurl?: string) {
         super(fileurl ?? 'activity.nedb')
     }
@@ -44,10 +44,10 @@ export class OnlineTimeService extends DatabaseService {
 
     updateOnlineTimeOnlineUser(changedUser: UserPOJO) {
         if (changedUser.isOnline) {
-            changedUser.totalMinutesOnline += onlineTimeService.calculateTimeDifferenceInMinutes(changedUser.onlineSince);
+            changedUser.totalMinutesOnline += this.calculateTimeDifferenceInMinutes(changedUser.onlineSince);
             changedUser.onlineSince = DateTime.local().toISO();
         }
-        onlineTimeService.update({userid: changedUser.userid}, changedUser);
+        this.update({userid: changedUser.userid}, changedUser);
     }
 
     async getMostActiveThisMonth(): Promise<UserPOJO[]> {

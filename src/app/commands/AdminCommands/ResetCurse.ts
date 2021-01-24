@@ -7,7 +7,6 @@ import {curseService} from "../../services/CurseService";
 import {CREATE_DEFAULT_EMBED, CREATE_ERROR_EMBED, getUserId} from "../../utils/functions";
 
 export abstract class ResetCurse {
-
     responseEmbed: MessageEmbed;
 
     @Command("resetcurse :username :amount")

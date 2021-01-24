@@ -1,11 +1,11 @@
 import {On} from "@typeit/discord";
 import {ACTIVE_USER, CRON_SCHEDULE, DATE_FORMAT, LOGGER, PREFIX} from "../utils/constants";
 import {Main} from "../Main";
-import {onlineTimeService} from "../services/OnlineTimeService";
 import {UserPOJO} from "../pojo/UserPOJO";
 import {DateTime} from "luxon";
-import {curseService} from "../services/CurseService";
 import {constrain, CREATE_DEFAULT_EMBED} from "../utils/functions";
+import {curseService} from "../services/CurseService";
+import {onlineTimeService} from "../services/OnlineTimeService";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const schedule = require("node-schedule")
@@ -59,33 +59,9 @@ export abstract class EReady {
 
         // This function will fire at that time
         schedule.scheduleJob(CRON_SCHEDULE, async () => {
-            LOGGER.info("Resetting message count and updating inactive count. It's the first of the month!")
-            const users = await onlineTimeService.findAll();
-            users.forEach(user => {
-                let messagesSentThisMonth = 0;
-                if (user.countPerDays) {
-                    user.countPerDays.forEach(day => messagesSentThisMonth += day.count);
-                    user.messagesSentAllTime += messagesSentThisMonth;
-                    user.countPerDays = [];
-                }
-                user = this.checkInactivity(user, messagesSentThisMonth, guildMembers);
-
-                // Max 240 warnings. That is 240 months. Should be more than enough. You can build a two month (-2) buffer by being active
-                user.inactiveWarnings = constrain(user.inactiveWarnings, -2, 240);
-                onlineTimeService.update({userid: user.userid}, user);
-            });
-
-            const curseUsers = await curseService.findAll();
-            for (const user of curseUsers) {
-                if (!user.countPerDays) break;
-                for (const day of user.countPerDays) {
-                    user.curseCountAllTime += day.count;
-                }
-                user.countPerDays = [];
-                curseService.update({userid: user.userid}, user);
-            }
-            LOGGER.info("Resetting message count and updating inactive count. It's the first of the month!")
+            await this.executeCronJob(guildMembers);
         });
+
         LOGGER.info('Bot started');
     }
 
@@ -101,5 +77,33 @@ export abstract class EReady {
         } else user.inactiveWarnings = user.inactiveWarnings--;
 
         return user;
+    }
+
+    private async executeCronJob(guildMembers) {
+        LOGGER.info("Resetting message count and updating inactive count. It's the first of the month!")
+        const users = await onlineTimeService.findAll();
+        users.forEach(user => {
+            let messagesSentThisMonth = 0;
+            if (user.countPerDays) {
+                user.countPerDays.forEach(day => messagesSentThisMonth += day.count);
+                user.messagesSentAllTime += messagesSentThisMonth;
+                user.countPerDays = [];
+            }
+            user = this.checkInactivity(user, messagesSentThisMonth, guildMembers);
+
+            // Max 240 warnings. That is 240 months. Should be more than enough. You can build a two month (-2) buffer by being active
+            user.inactiveWarnings = constrain(user.inactiveWarnings, -2, 240);
+            onlineTimeService.update({userid: user.userid}, user);
+        });
+
+        const curseUsers = await curseService.findAll();
+        for (const user of curseUsers) {
+            if (!user.countPerDays) break;
+            for (const day of user.countPerDays) {
+                user.curseCountAllTime += day.count;
+            }
+            user.countPerDays = [];
+            curseService.update({userid: user.userid}, user);
+        }
     }
 }

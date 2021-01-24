@@ -1,12 +1,11 @@
 import {Command, CommandMessage, Infos} from "@typeit/discord";
 import {LOGGER} from "../../utils/constants";
-import {onlineTimeService} from "../../services/OnlineTimeService";
 import {Duration} from "luxon";
 import {CREATE_DEFAULT_EMBED} from "../../utils/functions";
+import {onlineTimeService} from "../../services/OnlineTimeService";
 
 export abstract class GetTopOnlineUsers {
-
-    @Command("toponline")
+     @Command("toponline")
     @Infos({
         description: "Get the top online users",
         page: 1,
