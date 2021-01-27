@@ -22,7 +22,7 @@ export abstract class EReady {
                     onlineTimeService.addUserActivities(new UserPOJO(guildMember.user.username, guildMember.user.id, 0, DateTime.local().toISO(), true, 0, 0, [{
                         date: DateTime.local().toFormat(DATE_FORMAT),
                         count: 0
-                    }]));
+                    }], 0, []));
                 }
                     // If the user exists, put his online status to his current online status, so it matches. Because we can't guarantee he was online all the time since onlineSince, we don't calculate minutes online.
                 // Minutes are lost
@@ -38,6 +38,11 @@ export abstract class EReady {
                         ];
                         user.messagesSentAllTime = 0;
                     }
+                    if (user.vcCountPerDay) {
+                        const vcDay = user.vcCountPerDay.find(day => day.isInVc === true);
+                        if (vcDay) vcDay.lastJoined = DateTime.local().toISO();
+                    } else user.vcCountPerDay = []
+
                     onlineTimeService.update({userid: user.userid}, user);
                 }
             });
@@ -93,6 +98,15 @@ export abstract class EReady {
 
             // Max 240 warnings. That is 240 months. Should be more than enough. You can build a two month (-2) buffer by being active
             user.inactiveWarnings = constrain(user.inactiveWarnings, -2, 240);
+
+
+            let minutesInVcThisMonth = 0;
+            if (user.vcCountPerDay) {
+                user.vcCountPerDay.forEach(day => minutesInVcThisMonth += day.minutes);
+                user.vcCountPerDay = [];
+                user.vcMinutesAllTime += minutesInVcThisMonth;
+            }
+
             onlineTimeService.update({userid: user.userid}, user);
         });
 

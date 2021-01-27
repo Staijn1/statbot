@@ -2,7 +2,7 @@ import {CanvasRenderService} from "chartjs-node-canvas";
 import {ChartConfiguration, ChartData, ChartDataSets} from "chart.js";
 import {UserPOJO} from "../pojo/UserPOJO";
 import {CursePOJO} from "../pojo/CursePOJO";
-import {DATE_FORMAT, DEFAULT_COLOR_RGB, LOGGER, possibleChartColors} from "../utils/constants";
+import {DATE_FORMAT, DEFAULT_COLOR_HEX, LOGGER, possibleChartColors} from "../utils/constants";
 import {DateTime} from "luxon";
 import {CommandMessage} from "@typeit/discord";
 import {CREATE_DEFAULT_EMBED, CREATE_ERROR_EMBED} from "../utils/functions";
@@ -148,7 +148,7 @@ export class ChartService {
                 {
                     label: label,
                     data: data,
-                    borderColor: DEFAULT_COLOR_RGB,
+                    borderColor: DEFAULT_COLOR_HEX,
                     borderWidth: 6,
                     fill: false,
                     pointBorderColor: "white",
@@ -202,7 +202,9 @@ export class ChartService {
                 await message.channel.send({ files: [attachment], embed: response });
             } catch (e) {
                 LOGGER.error(`${e.message} || ${e.stack}`)
-                sentMessage = await message.channel.send(CREATE_ERROR_EMBED("Error!", "Sorry, I couldn't send your chart"))
+                const errorResponse = CREATE_ERROR_EMBED("Error!", "Sorry, I couldn't send your chart")
+                errorResponse.setFooter(`Reason: ${e.message}\n If you think this is an error, please contact the server owner first or send Staijn#5100 a message`)
+                sentMessage = await message.channel.send(errorResponse)
             }
         } else sentMessage = await message.channel.send(CREATE_ERROR_EMBED("Error!", "Sorry, I couldn't send your chart, because of missing data"))
         return sentMessage;

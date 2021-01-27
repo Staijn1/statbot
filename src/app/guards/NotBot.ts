@@ -18,3 +18,12 @@ export const NotBotPresence: GuardFunction<"presenceUpdate"> = async (
     const guildMember = newPresence.guild.members.cache.get(newPresence.userID)
     if (!guildMember.user.bot) await next();
 }
+
+export const NotBotVoice: GuardFunction<"voiceStateUpdate"> = async (
+    [oldVoiceState, newVoiceState],
+    client,
+    next
+) => {
+    const guildMember = newVoiceState.member;
+    if (!guildMember.user.bot) await next();
+}

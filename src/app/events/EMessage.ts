@@ -6,7 +6,7 @@ import {Message} from "discord.js";
 import {onlineTimeService} from "../services/OnlineTimeService";
 import {UserPOJO} from "../pojo/UserPOJO";
 import {DateTime} from "luxon";
-import {DATE_FORMAT} from "../utils/constants";
+import {DATE_FORMAT, LOGGER} from "../utils/constants";
 
 
 export abstract class EMessage {
@@ -49,14 +49,18 @@ export abstract class EMessage {
 
         if (curseCount > 1) {
             const numbers = this.convertToDigits(curseCount);
-            for (const number of numbers) {
-                await message.react(this.emojis[number]);
+            try {
+                for (const number of numbers) {
+                    await message.react(this.emojis[number]);
+                }
+            } catch (e) {
+                LOGGER.error(`${e.message} || ${e.stack}`)
             }
         }
 
         if (curseCount > 5) {
             let randomReplyIndex = Math.floor(Math.random() * this.replies.length);
-            while (randomReplyIndex == this.lastReplyIndex){
+            while (randomReplyIndex == this.lastReplyIndex) {
                 randomReplyIndex = Math.floor(Math.random() * this.replies.length);
             }
             this.lastReplyIndex = randomReplyIndex;

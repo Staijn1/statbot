@@ -13,7 +13,7 @@ class OnlineTimeService extends DatabaseService {
         const resultDatabase = await this.conn.find({}).sort(sort).limit(limit);
         const users = [];
         resultDatabase.forEach(row => {
-            users.push(new UserPOJO(row.username, row.userid, row.totalMinutesOnline, row.onlineSince, row.isOnline, row.messagesSentAllTime, row.inactiveWarnings, row.countPerDays))
+            users.push(new UserPOJO(row.username, row.userid, row.totalMinutesOnline, row.onlineSince, row.isOnline, row.messagesSentAllTime, row.inactiveWarnings, row.countPerDays, row.vcMinutesAllTime, row.vcCountPerDay))
         });
 
         return users;
@@ -21,7 +21,7 @@ class OnlineTimeService extends DatabaseService {
 
     async findOne(options: unknown): Promise<UserPOJO> {
         const result = await this.conn.findOne(options);
-        if (result) return new UserPOJO(result.username, result.userid, result.totalMinutesOnline, result.onlineSince, result.isOnline, result.messagesSentAllTime, result.inactiveWarnings, result.countPerDays);
+        if (result) return new UserPOJO(result.username, result.userid, result.totalMinutesOnline, result.onlineSince, result.isOnline, result.messagesSentAllTime, result.inactiveWarnings, result.countPerDays, result.vcMinutesAllTime, result.vcCountPerDay);
         else return undefined
     }
 

@@ -3,7 +3,7 @@ import {format, transports} from "winston";
 
 //These two are the same color!
 export const DEFAULT_COLOR = 0xdb682e;
-export const DEFAULT_COLOR_RGB = 'rgb(219,104,46)';
+export const DEFAULT_COLOR_HEX = '#db682e';
 
 export const ERROR_COLOR = 0xff0000;
 export const PREFIX = "&";

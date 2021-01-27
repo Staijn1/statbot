@@ -7,7 +7,7 @@ export abstract class DatabaseService {
 
     protected constructor(fileUrl: string) {
         this.conn = Datastore.create({
-            filename: this.baseUrl + fileUrl,
+            filename: path.join(this.baseUrl, fileUrl),
             autoload: true
         });
         this.conn.persistence.setAutocompactionInterval(30000);
