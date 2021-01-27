@@ -10,6 +10,14 @@ import {DATE_FORMAT} from "../utils/constants";
 
 
 export abstract class EMessage {
+    readonly emojis: string[] = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+    readonly replies: string[] = [
+        "are you okay? Been swearing a lot 😇",
+        "working on that curse count I see?",
+        "wow.",
+    ]
+    lastReplyIndex;
+
     @On("message")
     @Guard(NotBotMessage)
     async message([message]: ArgsOf<"message">): Promise<void> {
@@ -39,8 +47,20 @@ export abstract class EMessage {
             ));
         }
 
+        if (curseCount > 1) {
+            const numbers = this.convertToDigits(curseCount);
+            for (const number of numbers) {
+                await message.react(this.emojis[number]);
+            }
+        }
+
         if (curseCount > 5) {
-            await message.reply("are you okay? Been swearing a lot :)")
+            let randomReplyIndex = Math.floor(Math.random() * this.replies.length);
+            while (randomReplyIndex == this.lastReplyIndex){
+                randomReplyIndex = Math.floor(Math.random() * this.replies.length);
+            }
+            this.lastReplyIndex = randomReplyIndex;
+            await message.reply(this.replies[randomReplyIndex])
         }
     }
 
@@ -52,7 +72,16 @@ export abstract class EMessage {
             else user.countPerDays.push({date: DateTime.local().toFormat(DATE_FORMAT), count: 1})
             onlineTimeService.update({userid: user.userid}, user);
         } else if (onlineTimeService.isOnline(message.author.presence)) {
-            onlineTimeService.insert(new UserPOJO(message.author.username, message.author.username, 0, DateTime.local().toISO(), true, 1, 0, []))
+            onlineTimeService.insert(new UserPOJO(message.author.username, message.author.username, 0, DateTime.local().toISO(), true, 1, 0, [], 0, []))
         }
+    }
+
+    private convertToDigits(number: number): number[] {
+        const output = [], stringNumber = number.toString();
+
+        for (let i = 0, len = stringNumber.length; i < len; i += 1) {
+            output.push(+stringNumber.charAt(i));
+        }
+        return output;
     }
 }
