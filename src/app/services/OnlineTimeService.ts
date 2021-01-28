@@ -70,6 +70,32 @@ class OnlineTimeService extends DatabaseService {
     async getTopInactiveMembers() {
         return this.findAll({inactiveWarnings: DESC});
     }
+
+    async getMostInVoicechatThisMonth(): Promise<UserPOJO[]> {
+        const allUsers = await this.findAll();
+        allUsers.forEach(user => {
+            if (user.vcCountPerDay){
+                user.vcMinutesAllTime = 0;
+                user.vcCountPerDay.forEach(day => {
+                    user.vcMinutesAllTime += day.minutes;
+                })
+            }
+        });
+        return allUsers.sort(((a, b) => b.vcMinutesAllTime - a.vcMinutesAllTime))
+    }
+
+    async getMostInVoicechatAllTime(): Promise<UserPOJO[]> {
+        const allUsers = await this.findAll();
+        allUsers.forEach(user => {
+            if (user.vcCountPerDay){
+                if (!user.vcMinutesAllTime) user.vcMinutesAllTime = 0;
+                user.vcCountPerDay.forEach(day => {
+                    user.vcMinutesAllTime += day.minutes;
+                })
+            }
+        });
+        return allUsers.sort(((a, b) => b.vcMinutesAllTime - a.vcMinutesAllTime))
+    }
 }
 
 export class OnlineTimeServiceTest extends OnlineTimeService {
