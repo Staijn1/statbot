@@ -19,14 +19,30 @@ export abstract class EReady {
                 const isOnline = onlineTimeService.isOnline(guildMember.user.presence);
                 // If the user is online, not a bot and does not exist in our database yet, add him.
                 if (isOnline && !guildMember.user.bot && !user) {
-                    onlineTimeService.addUserActivities(new UserPOJO(guildMember.user.username, guildMember.user.id, 0, DateTime.local().toISO(), true, 0, 0, [{
-                        date: DateTime.local().toFormat(DATE_FORMAT),
-                        count: 0
-                    }], 0, []));
+                    onlineTimeService.addUserActivities(
+                        new UserPOJO(
+                            guildMember.user.username,
+                            guildMember.user.id,
+                            [],
+                            0,
+                            0,
+                            0,
+                            [{
+                                date: DateTime.local().toFormat(DATE_FORMAT),
+                                count: 0
+                            }], 0,
+                            [{
+                                lastJoined: DateTime.local().toFormat(DATE_FORMAT),
+                                minutes: 0,
+                                isInVc: false
+                            }]));
                 }
                     // If the user exists, put his online status to his current online status, so it matches. Because we can't guarantee he was online all the time since onlineSince, we don't calculate minutes online.
                 // Minutes are lost
                 else if (user) {
+                    //todo
+                    throw Error('Not implemented')
+                    /*
                     user.isOnline = isOnline;
                     // Convert old message format to new
                     if (!user.countPerDays) {
@@ -44,6 +60,8 @@ export abstract class EReady {
                     } else user.vcCountPerDay = []
 
                     onlineTimeService.update({userid: user.userid}, user);
+
+                     */
                 }
             });
 

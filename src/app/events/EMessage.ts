@@ -76,7 +76,11 @@ export abstract class EMessage {
             else user.countPerDays.push({date: DateTime.local().toFormat(DATE_FORMAT), count: 1})
             onlineTimeService.update({userid: user.userid}, user);
         } else if (onlineTimeService.isOnline(message.author.presence)) {
-            onlineTimeService.insert(new UserPOJO(message.author.username, message.author.username, 0, DateTime.local().toISO(), true, 1, 0, [], 0, []))
+            onlineTimeService.insert(new UserPOJO(message.author.username, message.author.username, [{
+                lastJoined: DateTime.local().toISO(),
+                isOnline: true,
+                minutes: 0
+            }], 0, 1, 0, [], 0, []))
         }
     }
 

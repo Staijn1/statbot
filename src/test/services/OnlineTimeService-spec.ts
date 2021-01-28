@@ -1,7 +1,3 @@
-
-import {UserPOJO} from "../../app/pojo/UserPOJO";
-import {Presence} from "discord.js";
-import {DateTime} from "luxon";
 import {OnlineTimeServiceTest} from "../../app/services/OnlineTimeService";
 
 

@@ -13,7 +13,7 @@ class OnlineTimeService extends DatabaseService {
         const resultDatabase = await this.conn.find({}).sort(sort).limit(limit);
         const users = [];
         resultDatabase.forEach(row => {
-            users.push(new UserPOJO(row.username, row.userid, row.totalMinutesOnline, row.onlineSince, row.isOnline, row.messagesSentAllTime, row.inactiveWarnings, row.countPerDays, row.vcMinutesAllTime, row.vcCountPerDay))
+            users.push(new UserPOJO(row.username, row.userid, row.minutesOnlinePerDay, row.totalMinutesOnlineAllTime, row.messagesSentAllTime, row.inactiveWarnings, row.countPerDays, row.vcMinutesAllTime, row.vcCountPerDay))
         });
 
         return users;
@@ -21,7 +21,7 @@ class OnlineTimeService extends DatabaseService {
 
     async findOne(options: unknown): Promise<UserPOJO> {
         const result = await this.conn.findOne(options);
-        if (result) return new UserPOJO(result.username, result.userid, result.totalMinutesOnline, result.onlineSince, result.isOnline, result.messagesSentAllTime, result.inactiveWarnings, result.countPerDays, result.vcMinutesAllTime, result.vcCountPerDay);
+        if (result) return new UserPOJO(result.username, result.userid, result.minutesOnlinePerDay, result.totalMinutesOnlineAllTime, result.messagesSentAllTime, result.inactiveWarnings, result.countPerDays, result.vcMinutesAllTime, result.vcCountPerDay);
         else return undefined
     }
 
@@ -39,15 +39,19 @@ class OnlineTimeService extends DatabaseService {
     }
 
     async getTopOnline(): Promise<UserPOJO[]> {
-        return this.findAll({totalMinutesOnline: DESC}, 10);
+        return this.findAll({totalMinutesOnlineAllTime: DESC}, 10);
     }
 
     updateOnlineTimeOnlineUser(changedUser: UserPOJO) {
+        throw Error('Not implemented')
+        /*
         if (changedUser.isOnline) {
-            changedUser.totalMinutesOnline += this.calculateTimeDifferenceInMinutes(changedUser.onlineSince);
+            changedUser.totalMinutesOnlineAllTime += this.calculateTimeDifferenceInMinutes(changedUser.onlineSince);
             changedUser.onlineSince = DateTime.local().toISO();
         }
+
         this.update({userid: changedUser.userid}, changedUser);
+        */
     }
 
     async getMostActiveThisMonth(): Promise<UserPOJO[]> {
@@ -74,7 +78,7 @@ class OnlineTimeService extends DatabaseService {
     async getMostInVoicechatThisMonth(): Promise<UserPOJO[]> {
         const allUsers = await this.findAll();
         allUsers.forEach(user => {
-            if (user.vcCountPerDay){
+            if (user.vcCountPerDay) {
                 user.vcMinutesAllTime = 0;
                 user.vcCountPerDay.forEach(day => {
                     user.vcMinutesAllTime += day.minutes;
@@ -87,7 +91,7 @@ class OnlineTimeService extends DatabaseService {
     async getMostInVoicechatAllTime(): Promise<UserPOJO[]> {
         const allUsers = await this.findAll();
         allUsers.forEach(user => {
-            if (user.vcCountPerDay){
+            if (user.vcCountPerDay) {
                 if (!user.vcMinutesAllTime) user.vcMinutesAllTime = 0;
                 user.vcCountPerDay.forEach(day => {
                     user.vcMinutesAllTime += day.minutes;

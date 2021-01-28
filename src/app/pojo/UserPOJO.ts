@@ -1,11 +1,10 @@
-import {CountPerDay, VCCountPerDay} from "../utils/types";
+import {CountPerDay, OnlineMinutesPerDay, VCCountPerDay} from "../utils/types";
 
 export class UserPOJO {
     username: string;
     userid: string;
-    totalMinutesOnline: number;
-    onlineSince: string;
-    isOnline: boolean;
+    minutesOnlinePerDay: OnlineMinutesPerDay[];
+    totalMinutesOnlineAllTime: number;
     messagesSentAllTime: number;
     inactiveWarnings: number;
     countPerDays: CountPerDay[];
@@ -15,9 +14,8 @@ export class UserPOJO {
     constructor(
         username: string,
         userid: string,
-        totalMinutesOnline: number,
-        onlineSince: string,
-        isOnline: boolean,
+        minutesOnlinePerDay: OnlineMinutesPerDay[],
+        totalMinutesOnlineAllTime: number,
         messagesSentAllTime: number,
         inactiveWarnings: number,
         countPerDays: CountPerDay[],
@@ -26,9 +24,8 @@ export class UserPOJO {
     ) {
         this.username = username;
         this.userid = userid;
-        this.totalMinutesOnline = totalMinutesOnline;
-        this.onlineSince = onlineSince;
-        this.isOnline = isOnline;
+        this.minutesOnlinePerDay = minutesOnlinePerDay;
+        this.totalMinutesOnlineAllTime = totalMinutesOnlineAllTime;
         this.messagesSentAllTime = messagesSentAllTime;
         this.inactiveWarnings = inactiveWarnings;
         this.countPerDays = countPerDays;

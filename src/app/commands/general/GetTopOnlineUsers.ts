@@ -30,7 +30,7 @@ export abstract class GetTopOnlineUsers {
 
         for (let i = 0; i < sortedUsers.length; i++) {
             const user = sortedUsers[i];
-            const formattedTime = Duration.fromObject({minutes: Math.floor(user.totalMinutesOnline)}).toFormat(("y 'years' d 'days' h 'hours' m 'minutes"));
+            const formattedTime = Duration.fromObject({minutes: Math.floor(user.totalMinutesOnlineAllTime)}).toFormat(("y 'years' d 'days' h 'hours' m 'minutes"));
             embed.addField(`${i + 1}. ${user.username}`, formattedTime);
         }
 
@@ -38,7 +38,7 @@ export abstract class GetTopOnlineUsers {
         if (!author) {
             embed.setFooter("Sorry your online time could not be loaded.");
         } else {
-            const formattedTime = Duration.fromObject({minutes: Math.floor(author.totalMinutesOnline)}).toFormat(("y 'years' d 'days' h 'hours' m 'minutes"));
+            const formattedTime = Duration.fromObject({minutes: Math.floor(author.totalMinutesOnlineAllTime)}).toFormat(("y 'years' d 'days' h 'hours' m 'minutes"));
             const position = sortedUsers.findIndex(user => user.userid === message.author.id);
             embed.setFooter(`You have been online for ${formattedTime}.\nPosition: ${position + 1}`);
         }

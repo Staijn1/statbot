@@ -8,3 +8,9 @@ export type VCCountPerDay = {
     minutes: number;
     isInVc: boolean;
 }
+
+export type OnlineMinutesPerDay = {
+    lastJoined: string;
+    minutes: number;
+    isOnline: boolean;
+}
