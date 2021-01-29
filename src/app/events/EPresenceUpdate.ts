@@ -59,44 +59,8 @@ export abstract class EPresenceUpdate {
     }
 
     async offline(leftPresence: Presence): Promise<void> {
-        const timestampLeft = DateTime.local();
         const userChanged = await this.localOnlinetimeService.findOne({userid: leftPresence.user.id});
-        if (!userChanged || !userChanged.minutesOnlinePerDay) return;
-
-
-        const lastKnownRecord = userChanged.minutesOnlinePerDay[userChanged.minutesOnlinePerDay.length - 1];
-        const timeJoinedObject = DateTime.fromISO(lastKnownRecord.lastJoined);
-        let timeSpentOnline = timestampLeft.diff(timeJoinedObject, "minutes").minutes;
-        const timeUntilMidnightFromOnlinetimestamp = DateTime.fromObject({
-            year: timeJoinedObject.year,
-            month: timeJoinedObject.month,
-            day: timeJoinedObject.day + 1,
-            hour: 0,
-            minute: 0,
-            second: 0
-        }).diff(timeJoinedObject, 'minutes').minutes;
-
-        // If we did not pass midnight while online, add the time to the day we joined
-        if (timeSpentOnline < timeUntilMidnightFromOnlinetimestamp) {
-            lastKnownRecord.minutes += timeSpentOnline;
-        } else {
-            timeSpentOnline -= timeUntilMidnightFromOnlinetimestamp;
-            lastKnownRecord.minutes += timeUntilMidnightFromOnlinetimestamp;
-            let dayOnline = timeJoinedObject.plus({day: 1});
-            while ((timeSpentOnline - 1440) > 0) {
-                userChanged.minutesOnlinePerDay.push({lastJoined: dayOnline.toISO(), minutes: 1440, isOnline: false});
-                dayOnline = dayOnline.plus({day: 1});
-                timeSpentOnline -= 1440;
-            }
-            // If we have minutes left, add them to the remaining day
-            if (timeSpentOnline >= 0) userChanged.minutesOnlinePerDay.push({
-                lastJoined: dayOnline.toISO(),
-                minutes: timeSpentOnline,
-                isOnline: false
-            });
-        }
-        lastKnownRecord.isOnline = false;
-        this.localOnlinetimeService.update({userid: userChanged.userid}, userChanged);
+        this.localOnlinetimeService.updateOnlineTimeOnlineUser(userChanged, false)
         LOGGER.info(`${leftPresence.user.username} went offline`)
     }
 }

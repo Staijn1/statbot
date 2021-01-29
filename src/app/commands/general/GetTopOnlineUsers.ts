@@ -1,35 +1,39 @@
 import {Command, CommandMessage, Infos} from "@typeit/discord";
-import {LOGGER} from "../../utils/constants";
-import {Duration} from "luxon";
 import {CREATE_DEFAULT_EMBED} from "../../utils/functions";
 import {onlineTimeService} from "../../services/OnlineTimeService";
+import {LOGGER} from "../../utils/constants";
+import {Duration} from "luxon";
 
 export abstract class GetTopOnlineUsers {
-     @Command("toponline")
+    @Command("toponline")
     @Infos({
         description: "Get the top online users",
         page: 1,
         admin: false
     })
     async showTop10OnlineUsers(message: CommandMessage): Promise<void> {
-        const embed = CREATE_DEFAULT_EMBED("Top 10 Online Users", "Times are sum of all online time");
+        const embed = CREATE_DEFAULT_EMBED("Top 10 Online Users", "Times are sum of all online time, all time");
         const users = await onlineTimeService.findAll();
-        users.forEach(user => {
-            onlineTimeService.updateOnlineTimeOnlineUser(user);
-        });
-        const sortedUsers = await onlineTimeService.getTopOnline();
 
-        if (sortedUsers.length > 0) {
-            try {
-                const guildMember = message.guild.members.cache.get(sortedUsers[0].userid);
-                embed.setThumbnail(guildMember.user.displayAvatarURL());
-            } catch (e) {
-                LOGGER.error(`${e.message} || ${e.stack}`)
+        for (const user of users) {
+            if (user.minutesOnlinePerDay.length > 0) {
+                const [lastKnownDay] = user.minutesOnlinePerDay.slice(-1);
+                const isCurrentlyOnline = lastKnownDay.isOnline
+                onlineTimeService.updateOnlineTimeOnlineUser(user, isCurrentlyOnline);
             }
         }
 
-        for (let i = 0; i < sortedUsers.length; i++) {
-            const user = sortedUsers[i];
+        const topOnlineMembersAllTime = await onlineTimeService.getTopOnlineMembersAllTime();
+
+        try {
+            const guildMember = message.guild.members.cache.get(topOnlineMembersAllTime[0].userid);
+            embed.setThumbnail(guildMember.user.displayAvatarURL());
+        } catch (e) {
+            LOGGER.error(`${e.message} || ${e.stack}`)
+        }
+
+        for (let i = 0; i < topOnlineMembersAllTime.slice(0, 10).length; i++) {
+            const user = topOnlineMembersAllTime[i];
             const formattedTime = Duration.fromObject({minutes: Math.floor(user.totalMinutesOnlineAllTime)}).toFormat(("y 'years' d 'days' h 'hours' m 'minutes"));
             embed.addField(`${i + 1}. ${user.username}`, formattedTime);
         }
@@ -38,8 +42,9 @@ export abstract class GetTopOnlineUsers {
         if (!author) {
             embed.setFooter("Sorry your online time could not be loaded.");
         } else {
-            const formattedTime = Duration.fromObject({minutes: Math.floor(author.totalMinutesOnlineAllTime)}).toFormat(("y 'years' d 'days' h 'hours' m 'minutes"));
-            const position = sortedUsers.findIndex(user => user.userid === message.author.id);
+            const position = topOnlineMembersAllTime.findIndex(user => user.userid === message.author.id);
+            const minutesSpent = topOnlineMembersAllTime[position].totalMinutesOnlineAllTime;
+            const formattedTime = Duration.fromObject({minutes: Math.floor(minutesSpent)}).toFormat(("y 'years' d 'days' h 'hours' m 'minutes"));
             embed.setFooter(`You have been online for ${formattedTime}.\nPosition: ${position + 1}`);
         }
 

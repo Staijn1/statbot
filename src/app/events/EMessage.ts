@@ -80,7 +80,7 @@ export abstract class EMessage {
                 lastJoined: DateTime.local().toISO(),
                 isOnline: true,
                 minutes: 0
-            }], 0, 1, 0, [], 0, []))
+            }], 0, 0, 0, [{date: DateTime.local().toFormat(DATE_FORMAT), count: 1}], 0, []))
         }
     }
 

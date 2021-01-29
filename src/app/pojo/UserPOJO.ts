@@ -24,7 +24,7 @@ export class UserPOJO {
     ) {
         this.username = username;
         this.userid = userid;
-        this.minutesOnlinePerDay = minutesOnlinePerDay;
+        this.minutesOnlinePerDay = minutesOnlinePerDay ?? [];
         this.totalMinutesOnlineAllTime = totalMinutesOnlineAllTime ?? 0;
         this.messagesSentAllTime = messagesSentAllTime ?? 0;
         this.inactiveWarnings = inactiveWarnings ?? 0;
