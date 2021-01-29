@@ -6,79 +6,67 @@ import {DateTime} from "luxon";
 import {constrain, CREATE_DEFAULT_EMBED} from "../utils/functions";
 import {curseService} from "../services/CurseService";
 import {onlineTimeService} from "../services/OnlineTimeService";
+import {EPresenceUpdate} from "./EPresenceUpdate";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const schedule = require("node-schedule")
 
 export abstract class EReady {
+
+
     @On("ready")
     async initialize(): Promise<void> {
-        const guildMembers = Main.Client.guilds.cache.get(process.env.GUILD_TOKEN).members.cache;
-        guildMembers.forEach((guildMember) => {
-            onlineTimeService.findOne({userid: guildMember.user.id}).then(user => {
-                const isOnline = onlineTimeService.isOnline(guildMember.user.presence);
-                // If the user is online, not a bot and does not exist in our database yet, add him.
-                if (isOnline && !guildMember.user.bot && !user) {
-                    onlineTimeService.addUserActivities(
-                        new UserPOJO(
-                            guildMember.user.username,
-                            guildMember.user.id,
-                            [],
-                            0,
-                            0,
-                            0,
-                            [{
-                                date: DateTime.local().toFormat(DATE_FORMAT),
-                                count: 0
-                            }], 0,
-                            [{
-                                lastJoined: DateTime.local().toFormat(DATE_FORMAT),
-                                minutes: 0,
-                                isInVc: false
-                            }]));
-                }
-                    // If the user exists, put his online status to his current online status, so it matches. Because we can't guarantee he was online all the time since onlineSince, we don't calculate minutes online.
-                // Minutes are lost
-                else if (user) {
-                    //todo
-                    throw Error('Not implemented')
-                    /*
-                    user.isOnline = isOnline;
-                    // Convert old message format to new
-                    if (!user.countPerDays) {
-                        user.countPerDays = [
-                            {
-                                date: DateTime.local().toFormat(DATE_FORMAT),
-                                count: user.messagesSentAllTime
-                            }
-                        ];
-                        user.messagesSentAllTime = 0;
-                    }
-                    if (user.vcCountPerDay) {
-                        const vcDay = user.vcCountPerDay.find(day => day.isInVc === true);
-                        if (vcDay) vcDay.lastJoined = DateTime.local().toISO();
-                    } else user.vcCountPerDay = []
-
-                    onlineTimeService.update({userid: user.userid}, user);
-
-                     */
-                }
-            });
-
-            //Make old code (curseCount) compatible by transferring cursecount to today
-            curseService.findOne({userid: guildMember.user.id}).then(curseUser => {
-                if (curseUser && !curseUser.countPerDays) {
-                    curseUser.countPerDays = [{
-                        date: DateTime.local().toFormat(DATE_FORMAT),
-                        count: curseUser.curseCountAllTime
-                    }];
-                    curseUser.curseCountAllTime = 0;
-                    curseService.update({userid: curseUser.userid}, curseUser);
-                }
-            })
-        });
-
         await Main.Client.user.setActivity(`${PREFIX}help`, {type: "LISTENING"})
+
+        const guildMembers = Main.Client.guilds.cache.get(process.env.GUILD_TOKEN).members.cache.array();
+
+        for (const guildMember of guildMembers) {
+            //todo check if user is in vc
+            const user = await onlineTimeService.findOne({userid: guildMember.user.id})
+            const isCurrentlyOnline = onlineTimeService.isOnline(guildMember.presence);
+
+            // If the user is online, not a bot and does not exist in our database yet, add him.
+            if (isCurrentlyOnline && !guildMember.user.bot) {
+                if (!user) {
+                    const newUser = new UserPOJO(
+                        guildMember.user.username,
+                        guildMember.user.id,
+                        [
+                            {
+                                lastJoined: DateTime.local().toISO(),
+                                isOnline: true,
+                                minutes: 0
+                            }
+                        ],
+                        0,
+                        0,
+                        0,
+                        [{
+                            date: DateTime.local().toFormat(DATE_FORMAT),
+                            count: 0
+                        }], 0,
+                        [{
+                            lastJoined: DateTime.local().toFormat(DATE_FORMAT),
+                            minutes: 0,
+                            isInVc: false
+                        }])
+
+                    onlineTimeService.insert(newUser);
+                } else {
+                    //We treat this user as if he just went online.
+                    const presenceUpdate = new class extends EPresenceUpdate {
+                    }
+                    await presenceUpdate.online(guildMember.presence);
+                }
+            } else if (!isCurrentlyOnline && user) {
+                if (!user.minutesOnlinePerDay) return;
+                for (const day of user.minutesOnlinePerDay) {
+                    day.isOnline = false;
+                }
+                const userid = user ? user.userid : undefined;
+                onlineTimeService.update({userid: userid}, user);
+            }
+        }
 
         // This function will fire at that time
         schedule.scheduleJob(CRON_SCHEDULE, async () => {
@@ -99,13 +87,15 @@ export abstract class EReady {
             }
         } else user.inactiveWarnings = user.inactiveWarnings--;
 
+        // Max 240 warnings. That is 240 months. Should be more than enough. You can build a two month (-2) buffer by being active
+        user.inactiveWarnings = constrain(user.inactiveWarnings, -2, 240);
         return user;
     }
 
     private async executeCronJob(guildMembers) {
         LOGGER.info("Resetting message count and updating inactive count. It's the first of the month!")
         const users = await onlineTimeService.findAll();
-        users.forEach(user => {
+        for (let user of users) {
             let messagesSentThisMonth = 0;
             if (user.countPerDays) {
                 user.countPerDays.forEach(day => messagesSentThisMonth += day.count);
@@ -114,10 +104,6 @@ export abstract class EReady {
             }
             user = this.checkInactivity(user, messagesSentThisMonth, guildMembers);
 
-            // Max 240 warnings. That is 240 months. Should be more than enough. You can build a two month (-2) buffer by being active
-            user.inactiveWarnings = constrain(user.inactiveWarnings, -2, 240);
-
-
             let minutesInVcThisMonth = 0;
             if (user.vcCountPerDay) {
                 user.vcCountPerDay.forEach(day => minutesInVcThisMonth += day.minutes);
@@ -125,8 +111,14 @@ export abstract class EReady {
                 user.vcMinutesAllTime += minutesInVcThisMonth;
             }
 
+            let minutesOnlineThisMonth = 0;
+            if (user.minutesOnlinePerDay) {
+                user.minutesOnlinePerDay.forEach(day => minutesOnlineThisMonth += day.minutes);
+                user.minutesOnlinePerDay = [];
+                user.totalMinutesOnlineAllTime += minutesInVcThisMonth;
+            }
             onlineTimeService.update({userid: user.userid}, user);
-        });
+        }
 
         const curseUsers = await curseService.findAll();
         for (const user of curseUsers) {

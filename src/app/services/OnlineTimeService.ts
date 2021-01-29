@@ -21,8 +21,11 @@ class OnlineTimeService extends DatabaseService {
 
     async findOne(options: unknown): Promise<UserPOJO> {
         const result = await this.conn.findOne(options);
-        if (result) return new UserPOJO(result.username, result.userid, result.minutesOnlinePerDay, result.totalMinutesOnlineAllTime, result.messagesSentAllTime, result.inactiveWarnings, result.countPerDays, result.vcMinutesAllTime, result.vcCountPerDay);
-        else return undefined
+        if (result) {
+            let minutesOnline = 0;
+            if(result.totalMinutesOnline) minutesOnline = result.totalMinutesOnline;
+            return new UserPOJO(result.username, result.userid, result.minutesOnlinePerDay, minutesOnline, result.messagesSentAllTime, result.inactiveWarnings, result.countPerDays, result.vcMinutesAllTime, result.vcCountPerDay);
+        } else return undefined
     }
 
     isOnline(presence: Presence): boolean {
