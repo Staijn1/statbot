@@ -8,7 +8,17 @@ import {DateTime} from "luxon";
 const guildStub = new Guild(Main.Client, {})
 const voiceStateNull = new VoiceState(guildStub, {});
 const voiceState = new VoiceState(guildStub, {})
-Object.defineProperties(voiceState, {channelID: {value: 1}, member: {value: {id: '189022609399218176'}}})
+Object.defineProperties(voiceState, {
+    channelID: {value: 1},
+    member: {
+        value: {
+            id: '189022609399218176',
+            user: {
+                username: "Mocked user"
+            }
+        }
+    }
+})
 
 const voiceStateJoined = [voiceStateNull, voiceState];
 const voiceStateLeft = [voiceState, voiceStateNull];
@@ -19,7 +29,11 @@ let sut = new class extends EVoiceStateUpdate {
     }
 }
 
-const testuser = new UserPOJO("Staijn", "189022609399218176", 0, "2021-01-26T10:58:09.651+00:00", false, 0, 0, [], 0, [])
+const testuser = new UserPOJO('Staijn', '189022609399218176', [{
+    lastJoined: '2021-01-26T10:58:09.651+00:00',
+    minutes: 0,
+    isOnline: true
+}], 0, 0, 0, [], 0, [])
 beforeAll(() => {
     sut.inject(new OnlineTimeServiceTest('mocks/EVoiceStateUpdate-spec.nedb'))
     sut.localOnlinetimeService.remove({}, {multi: true});
@@ -56,7 +70,11 @@ test('should not continue when user is not found, when user joins', async () => 
 });
 
 test('should continue when vcCountPerDay does not exist, when user joins', async () => {
-    const retVal = new UserPOJO("", "userid", 0, "", false, 0, 0, [], 0, []);
+    const retVal = new UserPOJO('Staijn', '189022609399218176', [{
+        lastJoined: '2021-01-26T10:58:09.651+00:00',
+        minutes: 0,
+        isOnline: true
+    }], 0, 0, 0, [], 0, [])
     delete retVal.vcCountPerDay;
     const findSpy = jest.spyOn(sut.localOnlinetimeService, 'findOne').mockReturnValue(Promise.resolve(retVal));
     const updateSpy = jest.spyOn(sut.localOnlinetimeService, 'update').mockImplementation(() => {
@@ -69,7 +87,11 @@ test('should continue when vcCountPerDay does not exist, when user joins', async
 });
 
 test('should continue when vcCountPerDay does not exist, when user joins', async () => {
-    const retVal = new UserPOJO("", "userid", 0, "", false, 0, 0, [], 0, []);
+    const retVal = new UserPOJO('Staijn', '189022609399218176', [{
+        lastJoined: '2021-01-26T10:58:09.651+00:00',
+        minutes: 0,
+        isOnline: true
+    }], 0, 0, 0, [], 0, [])
     delete retVal.vcCountPerDay;
     const findSpy = jest.spyOn(sut.localOnlinetimeService, 'findOne');
     const updateSpy = jest.spyOn(sut.localOnlinetimeService, 'update');

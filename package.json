@@ -12,7 +12,8 @@
     "lint": "eslint . --ext .ts --fix",
     "build": "tsc",
     "prod": "nodejs build/app/Main.js",
-    "test": "jest --watch"
+    "test": "jest --watch",
+    "webtest": "majestic"
   },
   "keywords": [
     "discord",

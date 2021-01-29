@@ -1,7 +1,3 @@
-
-import {UserPOJO} from "../../app/pojo/UserPOJO";
-import {Presence} from "discord.js";
-import {DateTime} from "luxon";
 import {OnlineTimeServiceTest} from "../../app/services/OnlineTimeService";
 
 
@@ -12,11 +8,12 @@ beforeAll(() => {
     // sut.remove({}, { multi: true });
 });
 
+/*
 test('should not return user when userid is not found', async () => {
     const result = await sut.findOne({userid: '1234'});
     expect(result).toBeUndefined();
 });
-/*
+
 test('should return userPOJO when userid is found', async () => {
     //todo repair
 
