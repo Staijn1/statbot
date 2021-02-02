@@ -4,15 +4,15 @@ import {onlineTimeService} from "../../services/OnlineTimeService";
 import {CREATE_DEFAULT_EMBED} from "../../utils/functions";
 
 export abstract class GetTopActiveUsers {
-    @Command("topactive")
+    @Command("topmessages")
     @Infos({
-        description: "Get the top active users based on messages, of all time",
+        description: "Get the top users based on messages, of this month",
         page: 1,
         admin: false
     })
     async showTopActiveUsers(message: CommandMessage): Promise<void> {
         const embed = CREATE_DEFAULT_EMBED("Top 10 Active Users", "The count of messages of this month")
-        const allUsers = await onlineTimeService.getMostActiveThisMonth();
+        const allUsers = await onlineTimeService.getMostMessagersThisMonth();
         const top10users = allUsers.slice(0, 10);
         const guildUser = message.guild.members.cache.get(top10users[0].userid);
         try {

@@ -46,7 +46,7 @@ export abstract class EReady {
                             count: 0
                         }], 0,
                         [{
-                            lastJoined: DateTime.local().toFormat(DATE_FORMAT),
+                            lastJoined: DateTime.local().toISO(),
                             minutes: 0,
                             isInVc: false
                         }])
@@ -76,14 +76,17 @@ export abstract class EReady {
         LOGGER.info('Bot started');
     }
 
-    private checkInactivity(user: UserPOJO, messagesSentThisMonth, guildMembers): UserPOJO {
+    private async checkInactivity(user: UserPOJO, messagesSentThisMonth): Promise<UserPOJO> {
         if (messagesSentThisMonth < ACTIVE_USER) {
             user.inactiveWarnings++;
             try {
-                const guildName = Main.Client.guilds.cache.get(process.env.GUILD_TOKEN).name;
-                guildMembers.get(user.userid).send(CREATE_DEFAULT_EMBED("Inactivity warning", `You have received an inactivity warning because you sent too few messages. You might get kicked if you are too inactive. To remove the warning, be more active this month.\n\nThis inactivity warning is for the server: ${guildName}`))
+                const guild = Main.Client.guilds.cache.get(process.env.GUILD_TOKEN);
+                const guildName = guild.name;
+                await Main.Client.users.cache.get(user.userid).send(CREATE_DEFAULT_EMBED("Inactivity warning", `You have received an inactivity warning because you sent too few messages. You might get kicked if you are too inactive. To remove the warning, be more active this month.\n\nThis inactivity warning is for the server: ${guildName}`));
+                LOGGER.info(`${user.username} received an inactivity warning`)
             } catch (e) {
-                LOGGER.error(`${e.message} || ${e.stack}`)
+                LOGGER.error(`User: ${user.username} ID: ${user.userid}`)
+                LOGGER.error(`${e.message} || ${e.stack}`);
             }
         } else user.inactiveWarnings = user.inactiveWarnings--;
 
@@ -100,22 +103,41 @@ export abstract class EReady {
             if (user.countPerDays) {
                 user.countPerDays.forEach(day => messagesSentThisMonth += day.count);
                 user.messagesSentAllTime += messagesSentThisMonth;
-                user.countPerDays = [];
+                user.countPerDays = [{
+                    date: DateTime.local().toFormat(DATE_FORMAT),
+                    count: 0
+                }];
             }
-            user = this.checkInactivity(user, messagesSentThisMonth, guildMembers);
+            user = await this.checkInactivity(user, messagesSentThisMonth);
 
             let minutesInVcThisMonth = 0;
             if (user.vcCountPerDay) {
-                user.vcCountPerDay.forEach(day => minutesInVcThisMonth += day.minutes);
-                user.vcCountPerDay = [];
+                let isInVc = false;
+                user.vcCountPerDay.forEach(day => {
+                    minutesInVcThisMonth += day.minutes;
+                    isInVc = day.isInVc
+                });
+                user.vcCountPerDay = [{
+                    lastJoined: DateTime.local().toISO(),
+                    minutes: 0,
+                    isInVc: isInVc
+                }];
                 user.vcMinutesAllTime += minutesInVcThisMonth;
             }
 
             let minutesOnlineThisMonth = 0;
             if (user.minutesOnlinePerDay) {
-                user.minutesOnlinePerDay.forEach(day => minutesOnlineThisMonth += day.minutes);
-                user.minutesOnlinePerDay = [];
-                user.totalMinutesOnlineAllTime += minutesInVcThisMonth;
+                let isOnline = false;
+                user.minutesOnlinePerDay.forEach(day => {
+                    minutesOnlineThisMonth += day.minutes;
+                    isOnline = day.isOnline;
+                });
+                user.minutesOnlinePerDay = [{
+                    lastJoined: DateTime.local().toISO(),
+                    minutes: 0,
+                    isOnline: isOnline,
+                }];
+                user.totalMinutesOnlineAllTime += minutesOnlineThisMonth;
             }
             onlineTimeService.update({userid: user.userid}, user);
         }
@@ -126,7 +148,10 @@ export abstract class EReady {
             for (const day of user.countPerDays) {
                 user.curseCountAllTime += day.count;
             }
-            user.countPerDays = [];
+            user.countPerDays = [{
+                date: DateTime.local().toFormat(DATE_FORMAT),
+                count: 0
+            }];
             curseService.update({userid: user.userid}, user);
         }
     }

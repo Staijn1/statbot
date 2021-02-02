@@ -28,6 +28,14 @@ export const CREATE_ERROR_EMBED = (title, message) => {
 export const CREATE_DEFAULT_EMBED = (title, message) => {
     return new MessageEmbed().setTitle(title).setDescription(message).setColor(DEFAULT_COLOR)
 }
+export const CREATE_CONSTRUCTION_EMBED = () => {
+    return new MessageEmbed()
+        .setTitle("\:construction\: \:construction\: Construction! \:construction: \:construction\:")
+        .setDescription(
+        "Strap your helmets on \:construction_worker\:, because it's construction time!\n" +
+        "This command currently is not available, because it's undergoing a big change. \:construction_site\: \n"
+    ).setFooter("Thanks, Staijn")
+}
 export const constrain = (num: number, min: number, max: number): number => {
     const MIN = min || 1;
     const MAX = max || 20;

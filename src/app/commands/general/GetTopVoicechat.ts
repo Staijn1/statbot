@@ -13,13 +13,8 @@ export abstract class GetTopActiveUsers {
     })
     async showTopVoiceChatUsers(message: CommandMessage): Promise<void> {
         const embed = CREATE_DEFAULT_EMBED("Top 10 Users In Voicechat", "The total amount of time spent in voicechat. Times are inaccurate when people are still in voicechat!")
-        const users = await onlineTimeService.findAll();
-        users.forEach(user => {
-            //todo implement for voicechat minutes
-            onlineTimeService.updateOnlineTimeOnlineUser(user, user.minutesOnlinePerDay[user.minutesOnlinePerDay.length - 1].isOnline);
-        });
-        let sortedUsers = await onlineTimeService.getMostInVoicechatAllTime();
-        sortedUsers = sortedUsers.slice(0, 10)
+        const allusers = await onlineTimeService.getMostInVoicechatAllTime();
+        const sortedUsers = allusers.slice(0, 10)
 
         if (sortedUsers.length > 0) {
             try {
@@ -45,7 +40,7 @@ export abstract class GetTopActiveUsers {
                 author.vcMinutesAllTime += day.minutes;
             })
             const formattedTime = Duration.fromObject({minutes: Math.floor(author.vcMinutesAllTime)}).toFormat(("y 'years' d 'days' h 'hours' m 'minutes"));
-            const position = sortedUsers.findIndex(user => user.userid === message.author.id);
+            const position = allusers.findIndex(user => user.userid === message.author.id);
             embed.setFooter(`You have been in voicechat for ${formattedTime}.\nPosition: ${position + 1}`);
         }
 

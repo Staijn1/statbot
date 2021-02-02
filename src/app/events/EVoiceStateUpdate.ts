@@ -52,14 +52,10 @@ export abstract class EVoiceStateUpdate {
         const lastKnownRecord = userChanged.vcCountPerDay[userChanged.vcCountPerDay.length - 1];
         const timeJoinedObject = DateTime.fromISO(lastKnownRecord.lastJoined);
         let timeSpentInVc = timestampLeft.diff(timeJoinedObject, "minutes").minutes;
-        const timeUntilMidnightFromJoinTime = DateTime.fromObject({
-            year: timeJoinedObject.year,
-            month: timeJoinedObject.month,
-            day: timeJoinedObject.day + 1,
-            hour: 0,
-            minute: 0,
-            second: 0
-        }).diff(timeJoinedObject, 'minutes').minutes;
+        const midnightObject = timeJoinedObject
+            .plus({day: 1})
+            .minus({hour: timeJoinedObject.hour, minute: timeJoinedObject.minute, second: timeJoinedObject.second, millisecond: timeJoinedObject.millisecond});
+        const timeUntilMidnightFromJoinTime = midnightObject.diff(timeJoinedObject, 'minutes').minutes;
 
         // If we did not pass midnight while in vc, add the time to the day we joined
         if (timeSpentInVc < timeUntilMidnightFromJoinTime) {

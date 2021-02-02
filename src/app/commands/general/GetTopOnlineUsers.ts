@@ -7,24 +7,13 @@ import {Duration} from "luxon";
 export abstract class GetTopOnlineUsers {
     @Command("toponline")
     @Infos({
-        description: "Get the top online users",
+        description: "Get the top online users of all time",
         page: 1,
         admin: false
     })
     async showTop10OnlineUsers(message: CommandMessage): Promise<void> {
         const embed = CREATE_DEFAULT_EMBED("Top 10 Online Users", "Times are sum of all online time, all time");
-        const users = await onlineTimeService.findAll();
-
-        for (const user of users) {
-            if (user.minutesOnlinePerDay.length > 0) {
-                const [lastKnownDay] = user.minutesOnlinePerDay.slice(-1);
-                const isCurrentlyOnline = lastKnownDay.isOnline
-                onlineTimeService.updateOnlineTimeOnlineUser(user, isCurrentlyOnline);
-            }
-        }
-
         const topOnlineMembersAllTime = await onlineTimeService.getTopOnlineMembersAllTime();
-
         try {
             const guildMember = message.guild.members.cache.get(topOnlineMembersAllTime[0].userid);
             embed.setThumbnail(guildMember.user.displayAvatarURL());

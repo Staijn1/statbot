@@ -7,7 +7,7 @@ import {CREATE_DEFAULT_EMBED} from "../../utils/functions";
 export abstract class CurseCount {
     @Command("topcurse")
     @Infos({
-        description: "These are the most profane users",
+        description: "These are the most profane users of all time",
         page: 1,
         admin: false,
     })
