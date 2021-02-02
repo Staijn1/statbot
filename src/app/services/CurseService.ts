@@ -2,7 +2,8 @@ import * as path from "path";
 import * as fs from "fs";
 import {DatabaseService} from "./DatabaseService";
 import {CursePOJO} from "../pojo/CursePOJO";
-import {LOGGER} from "../utils/constants";
+import {DATE_FORMAT, LOGGER} from "../utils/constants";
+import {DateTime} from "luxon";
 
 class CurseService extends DatabaseService {
     CURE_WORD_LIST_LOCATION = path.join(__dirname, "..", "..", "assets", "data", "curse.json");
@@ -72,29 +73,27 @@ class CurseService extends DatabaseService {
     }
 
     async getTopCursersOfAllTime(): Promise<CursePOJO[]> {
-        const topCursers: CursePOJO[] = [];
-        const items = await this.conn.find({}).exec();
-        items.forEach((doc, index) => {
-            topCursers[index] = new CursePOJO(doc.username, doc.userid, doc.curseCountAllTime, doc.countPerDays);
+        const users = await this.findAll();
+        users.forEach((user, index) => {
             let cursesThisMonth = 0;
             try {
-                topCursers[index].countPerDays.forEach(day => {
+                user.countPerDays.forEach(day => {
                     cursesThisMonth += day.count;
                 });
             } catch (e) {
                 if (e.message === 'Cannot read property \'forEach\' of undefined') {
-                    topCursers[index].countPerDays = [];
-                    this.update({userid: topCursers[index].userid}, topCursers[index])
+                    user.countPerDays = [{date: DateTime.local().toFormat(DATE_FORMAT), count: 0}];
+                    this.update({userid: user.userid}, user)
                 } else {
                     LOGGER.error(`${e.message} || ${e.stack}`);
                 }
             }
 
-            topCursers[index].curseCountAllTime += cursesThisMonth;
+            user.curseCountAllTime += cursesThisMonth;
         })
 
-        topCursers.sort((a, b) => b.curseCountAllTime - a.curseCountAllTime);
-        return topCursers;
+        users.sort((a, b) => b.curseCountAllTime - a.curseCountAllTime);
+        return users;
     }
 
     async getTopCursersOfThisMonth(): Promise<CursePOJO[]> {
@@ -124,6 +123,7 @@ class CurseService extends DatabaseService {
     }
 }
 
-export class CurseServiceTest extends CurseService {}
+export class CurseServiceTest extends CurseService {
+}
 
 export const curseService = new CurseService();
