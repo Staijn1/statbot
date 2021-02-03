@@ -21,7 +21,6 @@ export abstract class EReady {
         const guildMembers = Main.Client.guilds.cache.get(process.env.GUILD_TOKEN).members.cache.array();
 
         for (const guildMember of guildMembers) {
-            //todo check if user is in vc
             const user = await onlineTimeService.findOne({userid: guildMember.user.id})
             const isCurrentlyOnline = onlineTimeService.isOnline(guildMember.presence);
 

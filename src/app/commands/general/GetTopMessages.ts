@@ -11,7 +11,6 @@ export abstract class GetTopActiveUsers {
         admin: false
     })
     async showTopActiveUsers(message: CommandMessage): Promise<void> {
-        //todo check messages shown in list and footer
         const embed = CREATE_DEFAULT_EMBED("Top 10 Active Users", "The count of messages of all time")
         const allUsers = await onlineTimeService.getMostMessagersAllTime();
         const top10users = allUsers.slice(0, 10);
