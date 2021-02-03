@@ -32,53 +32,27 @@ class OnlineTimeService extends DatabaseService {
         return presence.status === 'online' || presence.status === 'dnd' || presence.status === 'idle';
     }
 
-    updateOnlineTimeOnlineUser(userChanged: UserPOJO, lastDayOnline: boolean) {
-        const now = DateTime.local();
-        if (!userChanged || !userChanged.minutesOnlinePerDay) return;
-
-
-        const lastKnownRecord = userChanged.minutesOnlinePerDay[userChanged.minutesOnlinePerDay.length - 1];
-
-        if (!lastKnownRecord.isOnline) return;
-
-        const timeJoinedObject = DateTime.fromISO(lastKnownRecord.lastJoined);
-        let timeSpentOnline = now.diff(timeJoinedObject, "minutes").minutes;
-        const midnightObject = timeJoinedObject
-            .plus({day: 1})
-            .minus({hour: timeJoinedObject.hour, minute: timeJoinedObject.minute, second: timeJoinedObject.second, millisecond: timeJoinedObject.millisecond});
-        const timeUntilMidnightFromOnlinetimestamp = midnightObject.diff(timeJoinedObject, 'minutes').minutes;
-
-        // If we did not pass midnight while online, add the time to the day we joined
-        if (timeSpentOnline < timeUntilMidnightFromOnlinetimestamp) {
-            lastKnownRecord.minutes += timeSpentOnline;
-        } else {
-            timeSpentOnline -= timeUntilMidnightFromOnlinetimestamp;
-            lastKnownRecord.minutes += timeUntilMidnightFromOnlinetimestamp;
-            let dayOnline = timeJoinedObject.plus({day: 1});
-            while ((timeSpentOnline - 1440) > 0) {
-                userChanged.minutesOnlinePerDay.push({lastJoined: dayOnline.toISO(), minutes: 1440, isOnline: false});
-                dayOnline = dayOnline.plus({day: 1});
-                timeSpentOnline -= 1440;
-            }
-            // If we have minutes left, add them to the remaining day
-            if (timeSpentOnline >= 0) userChanged.minutesOnlinePerDay.push({
-                lastJoined: dayOnline.toISO(),
-                minutes: timeSpentOnline,
-                isOnline: lastDayOnline
-            });
-        }
-        lastKnownRecord.isOnline = lastDayOnline;
-        if (lastDayOnline){
-            lastKnownRecord.lastJoined = now.toISO();
-        }
-        this.update({userid: userChanged.userid}, userChanged);
-    }
-
     async getMostMessagersThisMonth(): Promise<UserPOJO[]> {
         const topActive = await this.findAll({messagesSent: DESC});
         topActive.forEach(user => {
             if (user.countPerDays) {
                 user.messagesSentAllTime = 0;
+                user.countPerDays.forEach(day => {
+                    user.messagesSentAllTime += day.count;
+                })
+            }
+        });
+
+        topActive.sort((a, b) => {
+            return b.messagesSentAllTime - a.messagesSentAllTime;
+        })
+        return topActive;
+    }
+
+    async getMostMessagersAllTime(): Promise<UserPOJO[]> {
+        const topActive = await this.findAll({messagesSent: DESC});
+        topActive.forEach(user => {
+            if (user.countPerDays) {
                 user.countPerDays.forEach(day => {
                     user.messagesSentAllTime += day.count;
                 })
@@ -138,6 +112,24 @@ class OnlineTimeService extends DatabaseService {
         return users;
     }
 
+    async getTopOnlineMembersThisMonth() {
+        await this.updateAllOnlineTime();
+        const users = await onlineTimeService.findAll();
+
+        users.forEach(user => {
+            user.totalMinutesOnlineAllTime = 0;
+            user.minutesOnlinePerDay.forEach(day => {
+                user.totalMinutesOnlineAllTime += day.minutes;
+            });
+        });
+
+        users.sort(((a, b) => {
+            return b.totalMinutesOnlineAllTime - a.totalMinutesOnlineAllTime;
+        }));
+
+        return users;
+    }
+
     async updateAllOnlineTime() {
         const users = await onlineTimeService.findAll();
 
@@ -150,19 +142,54 @@ class OnlineTimeService extends DatabaseService {
         }
     }
 
-    async updateAllVoicechatTime() {
-        const users = await onlineTimeService.findAll();
+    updateOnlineTimeOnlineUser(userChanged: UserPOJO, lastDayOnline: boolean) {
+        const now = DateTime.local();
+        if (!userChanged || !userChanged.minutesOnlinePerDay) return;
 
-        for (const user of users) {
-            if (user.vcCountPerDay.length > 0) {
-                const [lastKnownDay] = user.vcCountPerDay.slice(-1);
-                const isCurrentInVoicechat = lastKnownDay.isInVc
-                await onlineTimeService.updateVoiceChatTime(user, isCurrentInVoicechat);
+
+        const lastKnownRecord = userChanged.minutesOnlinePerDay[userChanged.minutesOnlinePerDay.length - 1];
+
+        if (!lastKnownRecord.isOnline) return;
+
+        const timeJoinedObject = DateTime.fromISO(lastKnownRecord.lastJoined);
+        let timeSpentOnline = now.diff(timeJoinedObject, "minutes").minutes;
+        const midnightObject = timeJoinedObject
+            .plus({day: 1})
+            .minus({
+                hour: timeJoinedObject.hour,
+                minute: timeJoinedObject.minute,
+                second: timeJoinedObject.second,
+                millisecond: timeJoinedObject.millisecond
+            });
+        const timeUntilMidnightFromOnlinetimestamp = midnightObject.diff(timeJoinedObject, 'minutes').minutes;
+
+        // If we did not pass midnight while online, add the time to the day we joined
+        if (timeSpentOnline < timeUntilMidnightFromOnlinetimestamp) {
+            lastKnownRecord.minutes += timeSpentOnline;
+        } else {
+            timeSpentOnline -= timeUntilMidnightFromOnlinetimestamp;
+            lastKnownRecord.minutes += timeUntilMidnightFromOnlinetimestamp;
+            let dayOnline = timeJoinedObject.plus({day: 1});
+            while ((timeSpentOnline - 1440) > 0) {
+                userChanged.minutesOnlinePerDay.push({lastJoined: dayOnline.toISO(), minutes: 1440, isOnline: false});
+                dayOnline = dayOnline.plus({day: 1});
+                timeSpentOnline -= 1440;
             }
+            // If we have minutes left, add them to the remaining day
+            if (timeSpentOnline >= 0) userChanged.minutesOnlinePerDay.push({
+                lastJoined: dayOnline.toISO(),
+                minutes: timeSpentOnline,
+                isOnline: lastDayOnline
+            });
         }
+        lastKnownRecord.isOnline = lastDayOnline;
+        if (lastDayOnline) {
+            lastKnownRecord.lastJoined = now.toISO();
+        }
+        this.update({userid: userChanged.userid}, userChanged);
     }
 
-    async updateVoiceChatTime(userChanged: UserPOJO, isInVc: boolean): Promise<void> {
+    updateVoiceChatTime(userChanged: UserPOJO, isInVc: boolean): void {
         const now = DateTime.local();
         if (!userChanged || !userChanged.vcCountPerDay) return;
 
@@ -175,7 +202,12 @@ class OnlineTimeService extends DatabaseService {
         let timeSpentOnline = now.diff(timeJoinedObject, "minutes").minutes;
         const midnightObject = timeJoinedObject
             .plus({day: 1})
-            .minus({hour: timeJoinedObject.hour, minute: timeJoinedObject.minute, second: timeJoinedObject.second, millisecond: timeJoinedObject.millisecond});
+            .minus({
+                hour: timeJoinedObject.hour,
+                minute: timeJoinedObject.minute,
+                second: timeJoinedObject.second,
+                millisecond: timeJoinedObject.millisecond
+            });
         const timeUntilMidnightFromOnlinetimestamp = midnightObject.diff(timeJoinedObject, 'minutes').minutes;
 
         // If we did not pass midnight while online, add the time to the day we joined
@@ -198,29 +230,25 @@ class OnlineTimeService extends DatabaseService {
             });
         }
         lastKnownRecord.isInVc = isInVc;
-        if (isInVc){
+        if (isInVc) {
             lastKnownRecord.lastJoined = now.toISO();
         }
         this.update({userid: userChanged.userid}, userChanged);
     }
 
-    async getTopOnlineMembersThisMonth() {
-        await this.updateAllOnlineTime();
+    async updateAllVoicechatTime() {
         const users = await onlineTimeService.findAll();
 
-        users.forEach(user => {
-            user.totalMinutesOnlineAllTime = 0;
-            user.minutesOnlinePerDay.forEach(day => {
-                user.totalMinutesOnlineAllTime += day.minutes;
-            });
-        });
-
-        users.sort(((a, b) => {
-            return b.totalMinutesOnlineAllTime - a.totalMinutesOnlineAllTime;
-        }));
-
-        return users;
+        for (const user of users) {
+            if (user.vcCountPerDay.length > 0) {
+                const [lastKnownDay] = user.vcCountPerDay.slice(-1);
+                const isCurrentInVoicechat = lastKnownDay.isInVc
+                await onlineTimeService.updateVoiceChatTime(user, isCurrentInVoicechat);
+            }
+        }
     }
+
+
 }
 
 export class OnlineTimeServiceTest extends OnlineTimeService {

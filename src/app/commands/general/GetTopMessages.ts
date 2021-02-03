@@ -6,13 +6,14 @@ import {CREATE_DEFAULT_EMBED} from "../../utils/functions";
 export abstract class GetTopActiveUsers {
     @Command("topmessages")
     @Infos({
-        description: "Get the top users based on messages, of this month",
+        description: "Get the top users based on messages, of all time",
         page: 1,
         admin: false
     })
     async showTopActiveUsers(message: CommandMessage): Promise<void> {
-        const embed = CREATE_DEFAULT_EMBED("Top 10 Active Users", "The count of messages of this month")
-        const allUsers = await onlineTimeService.getMostMessagersThisMonth();
+        //todo check messages shown in list and footer
+        const embed = CREATE_DEFAULT_EMBED("Top 10 Active Users", "The count of messages of all time")
+        const allUsers = await onlineTimeService.getMostMessagersAllTime();
         const top10users = allUsers.slice(0, 10);
         const guildUser = message.guild.members.cache.get(top10users[0].userid);
         try {
@@ -32,8 +33,8 @@ export abstract class GetTopActiveUsers {
         } else {
             let messagesThisMonth = 0;
             author.countPerDays.forEach(day => messagesThisMonth += day.count)
-            const position = top10users.findIndex(user => user.userid === message.author.id);
-            embed.setFooter(`You have sent ${author.messagesSentAllTime + messagesThisMonth} messages this month.\nPosition: ${position + 1}`);
+            const position = allUsers.findIndex(user => user.userid === message.author.id);
+            embed.setFooter(`You have sent ${author.messagesSentAllTime + messagesThisMonth} messages\nPosition: ${position + 1}`);
         }
 
         await message.channel.send(embed);

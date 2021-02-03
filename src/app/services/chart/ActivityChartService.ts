@@ -111,9 +111,13 @@ export class ActivityChartService extends ChartService {
 
         // Update the online time of the user
         if (targetedUserPOJO.minutesOnlinePerDay.length > 0) {
-            const [lastKnownDay] = targetedUserPOJO.minutesOnlinePerDay.slice(-1);
-            const isCurrentlyOnline = lastKnownDay.isOnline
+            const [lastKnownDayOnline] = targetedUserPOJO.minutesOnlinePerDay.slice(-1);
+            const isCurrentlyOnline = lastKnownDayOnline.isOnline;
             onlineTimeService.updateOnlineTimeOnlineUser(targetedUserPOJO, isCurrentlyOnline);
+
+            const [lastKnownDayVC] = targetedUserPOJO.vcCountPerDay.slice(-1);
+            const isCurrentlyInVc = lastKnownDayVC.isInVc;
+            onlineTimeService.updateVoiceChatTime(targetedUserPOJO, isCurrentlyInVc)
         }
 
         this.setLabels(targetedUserPOJO, targetedCursePOJO);
