@@ -5,6 +5,7 @@ import {DateTime} from "luxon";
 import {UserPOJO} from "../../pojo/UserPOJO";
 import {ChartConfiguration, ChartDataSets} from "chart.js";
 import {DEFAULT_COLOR_HEX, possibleChartColors} from "../../utils/constants";
+import {convertMinutesToHours} from "../../utils/functions";
 
 export class OnlineTimeChart extends ChartService {
     config: ChartConfiguration = {
@@ -56,11 +57,12 @@ export class OnlineTimeChart extends ChartService {
                     {
                         scaleLabel: {
                             display: true,
-                            labelString: 'Minutes',
+                            labelString: 'Hours',
                             fontSize: 20,
                             fontColor: DEFAULT_COLOR_HEX
                         },
                         ticks: {
+                            max: 24,
                             autoSkip: false,
                             beginAtZero: true,
                             fontSize: 24,
@@ -82,6 +84,7 @@ export class OnlineTimeChart extends ChartService {
 
         this.prepareLabels(top10users);
         this.prepareData(top10users);
+        this.config.options.title.text = "Online hours for the top 10 online users this month"
         const image = await this.canvasRenderService.renderToBuffer(this.config);
         await this.sendChart(message, image)
     }
@@ -105,12 +108,12 @@ export class OnlineTimeChart extends ChartService {
             for (const day of users[i].vcCountPerDay) {
                 data.push({
                     t: DateTime.fromISO(day.lastJoined).toISODate(),
-                    y: day.minutes
+                    y: convertMinutesToHours(day.minutes)
                 });
             }
 
             datasets.push({
-                label: `Online minutes for ${users[i].username}`,
+                label: `Online hours for ${users[i].username}`,
                 data: data,
                 borderColor: possibleChartColors[i],
                 borderWidth: 6,

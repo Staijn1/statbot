@@ -7,7 +7,7 @@ import {DATE_FORMAT, DEFAULT_COLOR_HEX} from "../../utils/constants";
 import {DateTime} from "luxon";
 import {curseService} from "../CurseService";
 import {CursePOJO} from "../../pojo/CursePOJO";
-import {CREATE_ERROR_EMBED} from "../../utils/functions";
+import {convertMinutesToHours, CREATE_ERROR_EMBED} from "../../utils/functions";
 
 export class ActivityChartService extends ChartService {
     config: ChartConfiguration = {
@@ -57,10 +57,10 @@ export class ActivityChartService extends ChartService {
                 }],
                 yAxes: [
                     {
-                        id: 'minutes',
+                        id: 'hours',
                         scaleLabel: {
                             display: true,
-                            labelString: 'Minutes',
+                            labelString: 'Hours',
                             fontSize: 20,
                             fontColor: DEFAULT_COLOR_HEX
                         },
@@ -127,7 +127,7 @@ export class ActivityChartService extends ChartService {
         const messagesAmountDataset = this.getMessagesDataset(targetedUserPOJO);
         const curseAmountDataset = this.getCurseAmountDataset(targetedCursePOJO);
 
-        this.config.data.datasets = [onlineTimeDataset, messagesAmountDataset, vcTimeDataset, curseAmountDataset]
+        this.config.data.datasets = [onlineTimeDataset, vcTimeDataset, messagesAmountDataset, curseAmountDataset]
         this.config.options.title.text = `Online activities for ${targetedUserPOJO.username}`;
 
         const image = await this.canvasRenderService.renderToBuffer(this.config);
@@ -139,11 +139,14 @@ export class ActivityChartService extends ChartService {
         for (const day of targetedUserPOJO.minutesOnlinePerDay) {
             const date = DateTime.fromISO(day.lastJoined);
             const formatted = date.toFormat(DATE_FORMAT);
-            data.push({t: DateTime.fromFormat(formatted, DATE_FORMAT).toISO(), y: day.minutes});
+            data.push({
+                t: DateTime.fromFormat(formatted, DATE_FORMAT).toISO(),
+                y: convertMinutesToHours(day.minutes)
+            });
         }
         return {
-            label: 'Online minutes per day',
-            yAxisID: 'minutes',
+            label: 'Online hours per day',
+            yAxisID: 'hours',
             data: data,
             borderColor: DEFAULT_COLOR_HEX,
             borderWidth: 6,
@@ -190,11 +193,11 @@ export class ActivityChartService extends ChartService {
     private getVCTimeDataset(targetedUserPOJO: UserPOJO): ChartDataSets {
         const data = [];
         for (const day of targetedUserPOJO.vcCountPerDay) {
-            data.push({t: DateTime.fromISO(day.lastJoined).toISODate(), y: day.minutes});
+            data.push({t: DateTime.fromISO(day.lastJoined).toISODate(), y: convertMinutesToHours(day.minutes)});
         }
         return {
-            label: 'Voicechat minutes per day',
-            yAxisID: 'minutes',
+            label: 'Voicechat hours per day',
+            yAxisID: 'hours',
             data: data,
             borderColor: '#FFF00F',
             borderWidth: 6,

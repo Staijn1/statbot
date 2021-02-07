@@ -1,5 +1,6 @@
 import {DEFAULT_COLOR, ERROR_COLOR, LOGGER} from "./constants";
 import {Message, MessageEmbed, Permissions} from "discord.js";
+import {Duration} from "luxon";
 
 export function isModBasedOnMessage(message: Message): boolean {
     const guildMember = message.guild.members.cache.get(message.author.id);
@@ -32,12 +33,16 @@ export const CREATE_CONSTRUCTION_EMBED = () => {
     return new MessageEmbed()
         .setTitle("\:construction\: \:construction\: Construction! \:construction: \:construction\:")
         .setDescription(
-        "Strap your helmets on \:construction_worker\:, because it's construction time!\n" +
-        "This command currently is not available, because it's undergoing a big change. \:construction_site\: \n"
-    ).setFooter("Thanks, Staijn")
+            "Strap your helmets on \:construction_worker\:, because it's construction time!\n" +
+            "This command currently is not available, because it's undergoing a big change. \:construction_site\: \n"
+        ).setFooter("Thanks, Staijn")
 }
 export const constrain = (num: number, min: number, max: number): number => {
     const MIN = min || 1;
     const MAX = max || 20;
     return Math.min(Math.max(num, MIN), MAX)
+}
+
+export const convertMinutesToHours = (minutes: number): number => {
+    return Duration.fromObject({minute: minutes}).shiftTo('hours').hours
 }

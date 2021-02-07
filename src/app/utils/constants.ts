@@ -1,5 +1,6 @@
 import * as winston from "winston";
 import {format, transports} from "winston";
+import path from "path";
 
 //These two are the same color!
 export const DEFAULT_COLOR = 0xdb682e;
@@ -16,8 +17,8 @@ export const LOGGER = winston.createLogger({
         // - Write all logs with level `info` and below to `combined.log`
         //
         new transports.Console(),
-        // new winston.transports.File({filename: 'logs/error.log', level: 'error'}),
-        // new winston.transports.File({filename: 'logs/combined.log'}),
+        new winston.transports.File({filename: path.join(__dirname, 'logs', 'error.log'), level: 'error'}),
+        new winston.transports.File({filename: path.join(__dirname, 'logs', 'combined.log')}),
     ],
 });
 export const ACTIVE_USER = 100;

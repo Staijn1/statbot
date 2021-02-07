@@ -5,6 +5,7 @@ import {DEFAULT_COLOR_HEX, possibleChartColors} from "../../utils/constants";
 import {onlineTimeService} from "../OnlineTimeService";
 import {UserPOJO} from "../../pojo/UserPOJO";
 import {DateTime} from "luxon";
+import {convertMinutesToHours} from "../../utils/functions";
 
 export class VCChartService extends ChartService {
     config: ChartConfiguration = {
@@ -56,11 +57,12 @@ export class VCChartService extends ChartService {
                     {
                         scaleLabel: {
                             display: true,
-                            labelString: 'Minutes',
+                            labelString: 'Hours',
                             fontSize: 20,
                             fontColor: DEFAULT_COLOR_HEX
                         },
                         ticks: {
+                            max: 24,
                             autoSkip: false,
                             beginAtZero: true,
                             fontSize: 24,
@@ -82,6 +84,7 @@ export class VCChartService extends ChartService {
 
         this.prepareLabels(top10users);
         this.prepareData(top10users);
+        this.config.options.title.text = "Top 10 users in voice chat this month"
         const image = await this.canvasRenderService.renderToBuffer(this.config);
         await this.sendChart(message, image)
     }
@@ -105,12 +108,12 @@ export class VCChartService extends ChartService {
             for (const day of top10users[i].vcCountPerDay) {
                 data.push({
                     t: DateTime.fromISO(day.lastJoined).toISODate(),
-                    y: day.minutes
+                    y: convertMinutesToHours(day.minutes)
                 });
             }
 
             datasets.push({
-                label: `Voice chat minutes for ${top10users[i].username}`,
+                label: `Voice chat hours for ${top10users[i].username}`,
                 data: data,
                 borderColor: possibleChartColors[i],
                 borderWidth: 6,
