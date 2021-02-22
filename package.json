@@ -2,7 +2,7 @@
   "name": "statbot",
   "version": "1.0.0",
   "description": "A statbot for the Elimators Discord Server",
-  "main": "index.js",
+  "main": "build/app/Main.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/Staijn1/statbot"

@@ -1,6 +1,4 @@
 import {Command, CommandMessage, Infos} from "@typeit/discord";
-import {ChartService} from "../../services/chart/ChartService";
-import {curseService} from "../../services/CurseService";
 import {onlineTimeService} from "../../services/OnlineTimeService";
 import {CountChartService} from "../../services/chart/CountChartService";
 

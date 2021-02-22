@@ -218,9 +218,20 @@ export class ActivityChartService extends ChartService {
 
   private getMessagesDataset(targetedUserPOJO: UserPOJO): ChartDataSets {
     const data = [];
-    for (const day of targetedUserPOJO.countPerDays) {
-      data.push({t: DateTime.fromFormat(day.date, DATE_FORMAT).toISO(), y: day.count});
+    for (let i = 0; i < this.config.data.labels.length; i++) {
+      const label = this.config.data.labels[i];
+      const day = targetedUserPOJO.countPerDays.find(day => label === DateTime.fromFormat(day.date, DATE_FORMAT).toISODate())
+      if (!day){
+        data.push({t: label, y: 0});
+      } else{
+        data.push({t: DateTime.fromFormat(day.date, DATE_FORMAT).toISODate(), y: day.count});
+      }
     }
+
+    // const data = [];
+    // for (const day of targetedUserPOJO.countPerDays) {
+    //   data.push({t: DateTime.fromFormat(day.date, DATE_FORMAT).toISO(), y: day.count});
+    // }
     return {
       label: 'Amount of messages per day',
       yAxisID: 'amount',
@@ -237,9 +248,16 @@ export class ActivityChartService extends ChartService {
 
   private getCurseAmountDataset(targetedCursePOJO: CursePOJO) {
     const data = [];
-    for (const day of targetedCursePOJO.countPerDays) {
-      data.push({t: DateTime.fromFormat(day.date, DATE_FORMAT).toISO(), y: day.count});
+    for (let i = 0; i < this.config.data.labels.length; i++) {
+      const label = this.config.data.labels[i];
+      const day = targetedCursePOJO.countPerDays.find(day => label === DateTime.fromFormat(day.date, DATE_FORMAT).toISODate())
+      if (!day){
+        data.push({t: label, y: 0});
+      } else{
+        data.push({t: DateTime.fromFormat(day.date, DATE_FORMAT).toISODate(), y: day.count});
+      }
     }
+
     return {
       label: 'Amount of curses per day',
       yAxisID: 'amount',
