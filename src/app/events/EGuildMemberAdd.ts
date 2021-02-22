@@ -1,5 +1,5 @@
 import {On} from "@typeit/discord";
-import {GuildMember} from "discord.js";
+import {Guild, GuildMember} from "discord.js";
 import {onlineTimeService} from "../services/OnlineTimeService";
 import {curseService} from "../services/CurseService";
 import {UserPOJO} from "../pojo/UserPOJO";
@@ -12,8 +12,8 @@ export abstract class EGuildMemberAdd {
     localCurseService = curseService;
 
     @On("guildMemberAdd")
-    addMembersToDatabases(member: GuildMember): void {
-        member = member[0]
+    addMembersToDatabases(memberUpdate: GuildMember[]): void {
+        const member = memberUpdate[0]
         LOGGER.info(`Member ${member.user.username} joined guild ${member.guild.name}`)
         this.localOnlinetimeService.insert(new UserPOJO(member.user.username, member.user.id, [{
             lastJoined: DateTime.local().toISO(),

@@ -191,6 +191,7 @@ class OnlineTimeService extends DatabaseService {
 
     updateVoiceChatTime(userChanged: UserPOJO, isInVc: boolean): void {
         const now = DateTime.local();
+
         if (!userChanged || !userChanged.vcCountPerDay) return;
 
 
@@ -198,8 +199,9 @@ class OnlineTimeService extends DatabaseService {
 
         if (!lastKnownRecord.isInVc) return;
 
+        //Remove minus day 1 after testing!
         const timeJoinedObject = DateTime.fromISO(lastKnownRecord.lastJoined);
-        let timeSpentOnline = now.diff(timeJoinedObject, "minutes").minutes;
+        let timeSpentOnline = now.diff(timeJoinedObject, 'minutes').minutes;
         const midnightObject = timeJoinedObject
             .plus({day: 1})
             .minus({
@@ -233,6 +235,7 @@ class OnlineTimeService extends DatabaseService {
         if (isInVc) {
             lastKnownRecord.lastJoined = now.toISO();
         }
+
         this.update({userid: userChanged.userid}, userChanged);
     }
 
