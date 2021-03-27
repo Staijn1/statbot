@@ -220,18 +220,14 @@ export class ActivityChartService extends ChartService {
     const data = [];
     for (let i = 0; i < this.config.data.labels.length; i++) {
       const label = this.config.data.labels[i];
-      const day = targetedUserPOJO.countPerDays.find(day => label === DateTime.fromFormat(day.date, DATE_FORMAT).toISODate())
-      if (!day){
+      const dayFound = targetedUserPOJO.countPerDays.find(day => label === DateTime.fromFormat(day.date, DATE_FORMAT).toISODate())
+      if (!dayFound){
         data.push({t: label, y: 0});
       } else{
-        data.push({t: DateTime.fromFormat(day.date, DATE_FORMAT).toISODate(), y: day.count});
+        data.push({t: DateTime.fromFormat(dayFound.date, DATE_FORMAT).toISODate(), y: dayFound.count});
       }
     }
 
-    // const data = [];
-    // for (const day of targetedUserPOJO.countPerDays) {
-    //   data.push({t: DateTime.fromFormat(day.date, DATE_FORMAT).toISO(), y: day.count});
-    // }
     return {
       label: 'Amount of messages per day',
       yAxisID: 'amount',

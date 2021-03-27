@@ -19,7 +19,7 @@ export abstract class ChartService {
 
 
   protected async render(config: ChartConfiguration): Promise<Buffer> {
-    return await this.canvasRenderService.renderToBuffer(config)
+    return this.canvasRenderService.renderToBuffer(config)
   }
 
   async sendChart(message: CommandMessage, image: Buffer): Promise<Message> {
