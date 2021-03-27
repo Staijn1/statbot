@@ -1,7 +1,6 @@
 import {EGuildMemberAdd} from "../../app/events/EGuildMemberAdd";
 import {OnlineTimeServiceTest} from "../../app/services/OnlineTimeService";
 import {CurseServiceTest} from "../../app/services/CurseService";
-import {GuildMember} from "discord.js";
 
 let sut = new class extends EGuildMemberAdd {
     inject() {

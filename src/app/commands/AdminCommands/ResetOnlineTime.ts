@@ -3,8 +3,7 @@ import {NotBotMessage} from "../../guards/NotBot";
 import {IsAdminWithResponse} from "../../guards/IsAdminWithResponse";
 import {LOGGER, PREFIX, TIMEOUT} from "../../utils/constants";
 import {MessageEmbed} from "discord.js";
-import {curseService} from "../../services/CurseService";
-import {CREATE_DEFAULT_EMBED, CREATE_ERROR_EMBED, getUserId} from "../../utils/functions";
+import {CREATE_DEFAULT_EMBED, CREATE_ERROR_EMBED} from "../../utils/functions";
 import {onlineTimeService} from "../../services/OnlineTimeService";
 import {DateTime} from "luxon";
 

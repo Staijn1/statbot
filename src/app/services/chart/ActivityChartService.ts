@@ -2,7 +2,7 @@ import {ChartService} from "./ChartService";
 import {CommandMessage} from "@typeit/discord";
 import {onlineTimeService} from "../OnlineTimeService";
 import {UserPOJO} from "../../pojo/UserPOJO";
-import {ChartConfiguration, ChartDataSets} from "chart.js";
+import {ChartDataSets} from "chart.js";
 import {DATE_FORMAT, DEFAULT_COLOR_HEX} from "../../utils/constants";
 import {DateTime} from "luxon";
 import {curseService} from "../CurseService";

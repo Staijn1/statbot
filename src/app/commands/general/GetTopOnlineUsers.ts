@@ -1,5 +1,5 @@
 import {Command, CommandMessage, Infos} from "@typeit/discord";
-import {CREATE_CONSTRUCTION_EMBED, CREATE_DEFAULT_EMBED} from "../../utils/functions";
+import {CREATE_DEFAULT_EMBED} from "../../utils/functions";
 import {onlineTimeService} from "../../services/OnlineTimeService";
 import {LOGGER} from "../../utils/constants";
 import {Duration} from "luxon";

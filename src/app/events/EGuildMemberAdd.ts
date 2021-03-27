@@ -1,5 +1,5 @@
 import {On} from "@typeit/discord";
-import {Guild, GuildMember} from "discord.js";
+import {GuildMember} from "discord.js";
 import {onlineTimeService} from "../services/OnlineTimeService";
 import {curseService} from "../services/CurseService";
 import {UserPOJO} from "../pojo/UserPOJO";
