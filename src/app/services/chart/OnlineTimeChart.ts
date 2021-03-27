@@ -112,11 +112,11 @@ export class OnlineTimeChart extends ChartService {
       const data = [];
       for (let j = 0; j < this.config.data.labels.length; j++) {
         const label = this.config.data.labels[j];
-        const day = users[i].minutesOnlinePerDay.find(day => label === DateTime.fromISO(day.lastJoined).toISODate())
-        if (!day) {
+        const dayFound = users[i].minutesOnlinePerDay.find(day => label === DateTime.fromISO(day.lastJoined).toISODate())
+        if (!dayFound) {
           data.push({t: label, y: 0});
         } else {
-          data.push({t: DateTime.fromISO(day.lastJoined).toISODate(), y: convertMinutesToHours(day.minutes)});
+          data.push({t: DateTime.fromISO(dayFound.lastJoined).toISODate(), y: convertMinutesToHours(dayFound.minutes)});
         }
       }
 

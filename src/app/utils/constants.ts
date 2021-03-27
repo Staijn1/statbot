@@ -1,6 +1,5 @@
-import * as winston from "winston";
-import {format, transports} from "winston";
 import path from "path";
+import winston, {format, transports} from "winston";
 
 //These two are the same color!
 export const DEFAULT_COLOR = 0xdb682e;
